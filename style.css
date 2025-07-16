@@ -167,19 +167,21 @@ body {
 }
 
 .device-icon.lamp {
-    width: 112px;
-    height: 112px;
-    bottom: calc(50% - 15px) !important; /* -10px */
-    left: calc(76% - 30px) !important;  /* -20px */
+    /* Took styles from Speaker */
+    width: 140px;
+    height: 140px;
+    bottom: calc(15% + 5px) !important;
+    left: 30% !important;
     right: auto !important;
     top: auto !important;
 }
 
 .device-icon.speaker {
-    width: 140px;
-    height: 140px;
-    bottom: calc(15% + 5px) !important; /* +5px */
-    left: 30% !important;
+    /* Took styles from Lamp */
+    width: 112px;
+    height: 112px;
+    bottom: calc(50% - 15px) !important;
+    left: calc(76% - 30px) !important;
     right: auto !important;
     top: auto !important;
 }
