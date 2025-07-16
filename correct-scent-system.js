@@ -145,19 +145,19 @@ class PhysicalScentSystem {
                 position: [399, 867],  // 固定位置
                 scentType: 'lavender',
                 color: [255, 0, 255],  // 紫色
-                active: false
+                active: true
             },
             2: {  // 按鍵2 - 柑橘 (燈光)
                 position: [400, 1972],  // 固定位置
                 scentType: 'citrus',
                 color: [255, 165, 0],  // 橘色
-                active: false
+                active: true
             },
             3: {  // 按鍵3 - 尤加利 (音響)
                 position: [997, 1407],  // 固定位置
                 scentType: 'eucalyptus',
                 color: [0, 255, 0],  // 綠色
-                active: false
+                active: true
             }
         };
         
@@ -563,7 +563,7 @@ class PhysicalScentSystem {
     }
 }
 
-// 全局控制函數
+// 全局控制函数
 window.clearAllScents = () => {
     if (window.odoraiApp?.scentSystem) {
         window.odoraiApp.scentSystem.clearAllScents();
