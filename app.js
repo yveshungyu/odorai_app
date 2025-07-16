@@ -5,10 +5,18 @@ class OdoraiApp {
     constructor() {
         this.currentMode = 'relax';
         this.currentPage = 'home-page';
+        this.currentRoom = 'living'; // 新增: 當前房間狀態
         this.devices = {
             diffuser: true,
             lamp: false,
             speaker: false
+        };
+        
+        // 房間配置
+        this.rooms = {
+            living: { name: 'Living Room', icon: '🏠', background: 'LivingRoom-bg.png' },
+            master: { name: 'Master Bedroom', icon: '🛏️', background: 'MasterBedroom-bg.png' },
+            second: { name: 'Second Bedroom', icon: '🛌', background: 'SecondBedroom-bg.png' }
         };
         
         // Device position configuration for each mode - 恢復原始正確位置
@@ -120,6 +128,9 @@ class OdoraiApp {
         // Mode-page swipe for mode switching only
         this.setupModePageSwipe();
         
+        // Spatial-page swipe for room switching
+        this.setupSpatialPageSwipe();
+        
         // Add device button
         document.querySelector('.add-device-btn').addEventListener('click', () => {
             this.showAddDeviceDialog();
@@ -130,6 +141,9 @@ class OdoraiApp {
         
         // Add resize listener to keep scent points in sync
         window.addEventListener('resize', () => this.syncScentDevicePositions());
+        
+        // Spatial page interactions
+        this.setupSpatialPageInteractions();
     }
     
     setupTouchGestures() {
@@ -202,6 +216,38 @@ class OdoraiApp {
         });
     }
 
+    setupSpatialPageSwipe() {
+        const spatialPage = document.getElementById('spatial-page');
+        if (!spatialPage) return;
+        let startX = null;
+        let startY = null;
+        
+        spatialPage.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 1) return;
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+        }, { passive: true });
+        
+        spatialPage.addEventListener('touchend', (e) => {
+            if (startX === null) return;
+            const endX = e.changedTouches[0].clientX;
+            const endY = e.changedTouches[0].clientY;
+            const diffX = startX - endX;
+            const diffY = startY - endY;
+            
+            // 只偵測水平滑動且距離夠大
+            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+                if (diffX > 0) {
+                    this.animateRoomSwitch('next');
+                } else {
+                    this.animateRoomSwitch('prev');
+                }
+            }
+            startX = null;
+            startY = null;
+        });
+    }
+
     animateModeSwitch(direction) {
         const wrapper = document.querySelector('.mode-circle-wrapper');
         const oldCircle = wrapper.querySelector('.mode-circle');
@@ -254,6 +300,81 @@ class OdoraiApp {
                 modeDots.classList.remove('slide-left', 'slide-right');
             }
         }, 400);
+    }
+
+    animateRoomSwitch(direction) {
+        const roomKeys = Object.keys(this.rooms);
+        const currentIndex = roomKeys.indexOf(this.currentRoom);
+        let newIndex;
+        
+        if (direction === 'next') {
+            newIndex = (currentIndex + 1) % roomKeys.length;
+        } else {
+            newIndex = (currentIndex - 1 + roomKeys.length) % roomKeys.length;
+        }
+        
+        const newRoom = roomKeys[newIndex];
+        
+        // 房間導航點動畫
+        const roomDots = document.querySelector('.room-dots');
+        if (roomDots) {
+            const dots = Array.from(roomDots.children);
+            dots.forEach(dot => dot.classList.remove('middle'));
+            dots[newIndex].classList.add('middle');
+            
+            // 導航點滑動動畫
+            roomDots.classList.remove('slide-left', 'slide-right');
+            roomDots.classList.add(direction === 'next' ? 'slide-left' : 'slide-right');
+        }
+        
+        // 背景切換動畫
+        const roomBackground = document.querySelector('.room-background');
+        if (roomBackground) {
+            roomBackground.style.opacity = '0.7';
+            setTimeout(() => {
+                this.currentRoom = newRoom;
+                this.updateRoomUI();
+                roomBackground.style.opacity = '1';
+                if (roomDots) {
+                    roomDots.classList.remove('slide-left', 'slide-right');
+                }
+            }, 200);
+        } else {
+            this.currentRoom = newRoom;
+            this.updateRoomUI();
+            if (roomDots) {
+                roomDots.classList.remove('slide-left', 'slide-right');
+            }
+        }
+    }
+
+    updateRoomUI() {
+        const room = this.rooms[this.currentRoom];
+        
+        // 更新房間標籤
+        const roomLabel = document.querySelector('.room-label span');
+        const roomIcon = document.querySelector('.room-icon');
+        if (roomLabel) roomLabel.textContent = room.name;
+        if (roomIcon) roomIcon.textContent = room.icon;
+        
+        // 更新背景圖片
+        const roomBackground = document.querySelector('.room-background');
+        if (roomBackground) {
+            roomBackground.style.backgroundImage = `url('./assets/images/${room.background}')`;
+        }
+        
+        // 更新房間導航點
+        const roomDots = document.querySelector('.room-dots');
+        if (roomDots) {
+            const roomKeys = Object.keys(this.rooms);
+            const currentIndex = roomKeys.indexOf(this.currentRoom);
+            const dots = Array.from(roomDots.children);
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('middle', index === currentIndex);
+            });
+        }
+        
+        console.log(`🏠 切換到房間: ${room.name}`);
     }
     
     switchPage(pageId) {
@@ -779,24 +900,226 @@ class OdoraiApp {
     }
     
     updateSpatialView() {
-        const diffuserDevice = document.querySelector('.diffuser-device');
-        const scentZones = document.querySelectorAll('.scent-zone');
+        // Update room devices based on current device states
+        const roomDevices = document.querySelectorAll('.room-device');
+        const scentAreas = document.querySelectorAll('.scent-area');
         
-        if (this.devices.diffuser) {
-            if (diffuserDevice) {
-                diffuserDevice.classList.add('active');
+        roomDevices.forEach(device => {
+            const deviceType = device.dataset.device;
+            const statusIndicator = device.querySelector('.device-status');
+            
+            if (deviceType && this.devices[deviceType]) {
+                device.classList.add('active');
+                if (statusIndicator) {
+                    statusIndicator.classList.add('active');
+                }
+            } else {
+                device.classList.remove('active');
+                if (statusIndicator) {
+                    statusIndicator.classList.remove('active');
+                }
             }
-            scentZones.forEach(zone => {
-                zone.style.display = 'block';
-            });
-        } else {
-            if (diffuserDevice) {
-                diffuserDevice.classList.remove('active');
-            }
-            scentZones.forEach(zone => {
-                zone.style.display = 'none';
-            });
+        });
+        
+        // Show/hide scent visualization areas
+        scentAreas.forEach(area => {
+            const hasActiveDevices = Object.values(this.devices).some(isActive => isActive);
+            area.style.display = hasActiveDevices ? 'block' : 'none';
+        });
+        
+        // Update room background based on mode
+        const roomBackground = document.querySelector('.room-background');
+        if (roomBackground) {
+            roomBackground.className = `room-background mode-${this.currentMode}`;
         }
+    }
+    
+    setupSpatialPageInteractions() {
+        // Initialize room UI
+        this.updateRoomUI();
+        
+        // Room device interactions
+        document.addEventListener('click', (e) => {
+            const roomDevice = e.target.closest('.room-device');
+            if (roomDevice) {
+                const deviceType = roomDevice.dataset.device;
+                if (deviceType) {
+                    this.toggleDevice(deviceType);
+                    this.showSpatialDeviceAnimation(roomDevice);
+                }
+            }
+        });
+        
+        // Add point interactions
+        document.addEventListener('click', (e) => {
+            const addPoint = e.target.closest('.add-point');
+            if (addPoint) {
+                this.showAddDeviceAtPoint(addPoint);
+            }
+        });
+        
+        // Info icon in spatial header
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.spatial-header .info-icon')) {
+                this.showSpatialInfo();
+            }
+        });
+    }
+    
+    showSpatialDeviceAnimation(deviceElement) {
+        // Add visual feedback when device is activated
+        deviceElement.style.transform += ' scale(1.2)';
+        setTimeout(() => {
+            deviceElement.style.transform = deviceElement.style.transform.replace(' scale(1.2)', '');
+        }, 200);
+        
+        // Show scent burst animation
+        const burst = document.createElement('div');
+        burst.className = 'scent-burst';
+        burst.style.cssText = `
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 20, 147, 0.6) 0%, transparent 70%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            pointer-events: none;
+            z-index: 100;
+            animation: scentBurst 1s ease-out forwards;
+        `;
+        
+        deviceElement.appendChild(burst);
+        setTimeout(() => burst.remove(), 1000);
+    }
+    
+    showAddDeviceAtPoint(pointElement) {
+        const deviceOptions = [
+            { name: 'Smart Air Purifier', icon: '💨', price: '$299' },
+            { name: 'Ultrasonic Humidifier', icon: '💧', price: '$149' },
+            { name: 'Aromatherapy Candle', icon: '🕯️', price: '$39' },
+            { name: 'Smart Plant Monitor', icon: '🌱', price: '$79' }
+        ];
+        
+        const randomDevice = deviceOptions[Math.floor(Math.random() * deviceOptions.length)];
+        
+        const dialog = document.createElement('div');
+        dialog.className = 'add-device-dialog';
+        dialog.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(20px);
+            z-index: 3000;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            min-width: 280px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        `;
+        
+        dialog.innerHTML = `
+            <div style="font-size: 40px; margin-bottom: 15px;">${randomDevice.icon}</div>
+            <h3 style="margin-bottom: 10px; color: #333; font-size: 18px;">${randomDevice.name}</h3>
+            <p style="color: #666; margin-bottom: 15px; font-size: 14px;">Perfect for this location</p>
+            <p style="color: #FF6B95; margin-bottom: 20px; font-weight: 600; font-size: 16px;">${randomDevice.price}</p>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button onclick="this.closest('.add-device-dialog').remove()" style="
+                    background: linear-gradient(135deg, #FF6B95 0%, #FFA726 100%);
+                    color: white;
+                    border: none;
+                    padding: 12px 20px;
+                    border-radius: 25px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    font-size: 14px;
+                ">Add Device</button>
+                <button onclick="this.closest('.add-device-dialog').remove()" style="
+                    background: rgba(0, 0, 0, 0.1);
+                    color: #666;
+                    border: none;
+                    padding: 12px 20px;
+                    border-radius: 25px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    font-size: 14px;
+                ">Cancel</button>
+            </div>
+        `;
+        
+        document.body.appendChild(dialog);
+        
+        // Add animation
+        setTimeout(() => {
+            dialog.style.transform = 'translate(-50%, -50%) scale(1)';
+            dialog.style.opacity = '1';
+        }, 10);
+        
+        // Auto-remove after 8 seconds
+        setTimeout(() => {
+            if (dialog.parentElement) {
+                dialog.style.transform = 'translate(-50%, -50%) scale(0.8)';
+                dialog.style.opacity = '0';
+                setTimeout(() => dialog.remove(), 300);
+            }
+        }, 8000);
+    }
+    
+    showSpatialInfo() {
+        const infoDialog = document.createElement('div');
+        infoDialog.className = 'spatial-info-dialog';
+        infoDialog.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(20px);
+            z-index: 3000;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 320px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        `;
+        
+        infoDialog.innerHTML = `
+            <h3 style="margin-bottom: 15px; color: #333; font-size: 18px;">🏠 Living Room Setup</h3>
+            <div style="text-align: left; margin-bottom: 20px; color: #666; font-size: 14px; line-height: 1.6;">
+                <p><strong>Active Devices:</strong></p>
+                <ul style="margin: 10px 0; padding-left: 20px;">
+                    <li>💜 Lavender Diffuser (Relaxation)</li>
+                    <li>🍊 Citrus Speaker (Energy)</li>
+                    <li>🌿 Eucalyptus Lamp (Focus)</li>
+                </ul>
+                <p><strong>Current Mode:</strong> ${this.modes[this.currentMode].name}</p>
+                <p><strong>Room Size:</strong> 24m² / 258ft²</p>
+            </div>
+            <button onclick="this.closest('.spatial-info-dialog').remove()" style="
+                background: linear-gradient(135deg, #FF6B95 0%, #FFA726 100%);
+                color: white;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 25px;
+                font-weight: 600;
+                cursor: pointer;
+                font-size: 14px;
+            ">Got it</button>
+        `;
+        
+        document.body.appendChild(infoDialog);
+        
+        // Auto-remove after 10 seconds
+        setTimeout(() => {
+            if (infoDialog.parentElement) {
+                infoDialog.remove();
+            }
+        }, 10000);
     }
     
     startAutoTrigger() {

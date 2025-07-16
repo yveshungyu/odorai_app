@@ -90,34 +90,70 @@
 
         <!-- Spatial Page -->
         <div class="page spatial-page" id="spatial-page">
-            <div class="room-container">
-                <div class="isometric-room">
-                    <!-- Room structure -->
-                    <div class="room-walls">
-                        <div class="wall back-wall"></div>
-                        <div class="wall left-wall"></div>
-                        <div class="wall right-wall"></div>
-                        <div class="floor"></div>
+            <div class="spatial-header">
+                <div class="spatial-greeting">
+                    <h2>Hello, Yves !</h2>
+                    <p>Anything I can help you with?</p>
+                </div>
+                <div class="info-icon">i</div>
+            </div>
+
+            <div class="room-scene">
+                <div class="room-background">
+                    <!-- 房間背景圖片作為背景 -->
+                    
+                    <!-- 設備圖標 -->
+                    <div class="device-overlays">
+                        <!-- 黑色機器人設備 -->
+                        <div class="room-device robot-device" data-device="diffuser" style="top: 60%; left: 30%;">
+                            <div class="device-icon">🤖</div>
+                            <div class="device-status active"></div>
+                        </div>
+                        
+                        <!-- 粉色燈設備 -->
+                        <div class="room-device lamp-device" data-device="lamp" style="top: 40%; right: 20%;">
+                            <div class="device-icon">💡</div>
+                            <div class="device-status"></div>
+                        </div>
+                        
+                        <!-- 藍色音響設備 -->
+                        <div class="room-device speaker-device" data-device="speaker" style="bottom: 30%; left: 50%;">
+                            <div class="device-icon">🔊</div>
+                            <div class="device-status"></div>
+                        </div>
                     </div>
                     
-                    <!-- Furniture -->
-                    <div class="furniture">
-                        <div class="sofa"></div>
-                        <div class="coffee-table"></div>
-                        <div class="side-table"></div>
-                        <div class="plant"></div>
-                        <div class="bookshelf"></div>
-                        <div class="chair"></div>
+                    <!-- 添加設備按鈕 -->
+                    <div class="add-device-points">
+                        <div class="add-point" style="top: 70%; left: 15%;">
+                            <div class="add-icon">+</div>
+                        </div>
+                        <div class="add-point" style="bottom: 15%; right: 30%;">
+                            <div class="add-icon">+</div>
+                        </div>
+                        <div class="add-point" style="top: 30%; left: 60%;">
+                            <div class="add-icon">+</div>
+                        </div>
                     </div>
                     
-                    <!-- Diffuser and scent zones -->
-                    <div class="diffuser-device active"></div>
-                    <div class="scent-zones">
-                        <div class="scent-zone zone-1"></div>
-                        <div class="scent-zone zone-2"></div>
-                        <div class="scent-zone zone-3"></div>
+                    <!-- 氣味可視化 -->
+                    <div class="scent-visualizations">
+                        <div class="scent-area" style="top: 40%; left: 20%; width: 80px; height: 80px;"></div>
+                        <div class="scent-area" style="top: 30%; right: 10%; width: 60px; height: 60px;"></div>
+                        <div class="scent-area" style="bottom: 20%; left: 35%; width: 70px; height: 70px;"></div>
                     </div>
                 </div>
+            </div>
+            
+            <div class="room-dots">
+                <div class="dot"></div>
+                <div class="dot middle"></div>
+                <div class="dot"></div>
+            </div>
+            
+            <div class="room-label">
+                <div class="room-icon">🏠</div>
+                <span>Living Room</span>
             </div>
         </div>
     </div>

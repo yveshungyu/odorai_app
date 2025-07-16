@@ -481,125 +481,276 @@ body {
 
 /* Spatial Page Styles */
 .spatial-page {
-    background: linear-gradient(135deg, #FFF5E6 0%, #FFE5B4 100%);
+    background: linear-gradient(180deg, #E8E8E8 0%, #D0D0D0 100%);
+    flex-direction: column;
+    padding: 40px 5px 80px;
+    overflow: hidden;
+}
+
+.spatial-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+    margin-bottom: 40px;
+    padding: 0 10px;
+}
+
+.spatial-greeting h2 {
+    font-size: 28px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 8px 0;
+}
+
+.spatial-greeting p {
+    font-size: 16px;
+    color: #666;
+    margin: 0;
+}
+
+.spatial-header .info-icon {
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.room-scene {
+    flex: 1;
+    display: flex;
     justify-content: center;
     align-items: center;
-    padding: 40px 20px;
+    margin-bottom: 30px;
+    padding: 5px;
 }
 
-.room-container {
-    width: 100%;
-    max-width: 400px;
-    height: 400px;
-    perspective: 1000px;
+.room-background {
     position: relative;
+    width: 90vw;
+    height: 83.94vw; /* 維持2332:2175比例 (90vw * 2175/2332 = 90vw * 0.9327) */
+    background: url('./assets/images/LivingRoom-bg.png') center/contain no-repeat;
+    background-size: contain;
+    transition: all 0.5s ease, opacity 0.2s ease;
 }
 
-.isometric-room {
-    width: 100%;
-    height: 100%;
-    position: relative;
-    transform-style: preserve-3d;
-    transform: rotateX(60deg) rotateY(-45deg);
+/* 背景切換功能 - 根據不同模式使用不同背景 */
+.room-background.mode-relax {
+    background-image: url('./assets/images/LivingRoom-bg.png');
 }
 
-.room-walls {
-    position: relative;
-    width: 100%;
-    height: 100%;
+.room-background.mode-focus {
+    background-image: url('./assets/images/LivingRoom-bg.png'); /* 可以換成focus-bg.png */
+    filter: hue-rotate(180deg) saturate(1.2) brightness(1.05);
 }
 
-.wall {
+.room-background.mode-energize {
+    background-image: url('./assets/images/LivingRoom-bg.png'); /* 可以換成energize-bg.png */
+    filter: hue-rotate(60deg) saturate(1.3) brightness(1.1);
+}
+
+/* Device Overlays */
+.device-overlays {
     position: absolute;
-    background: linear-gradient(135deg, #D4A574 0%, #C09858 100%);
-}
-
-.back-wall {
     width: 100%;
-    height: 60%;
-    top: 0;
-    left: 0;
-    transform: rotateX(90deg) translateZ(120px);
-}
-
-.left-wall {
-    width: 60%;
     height: 100%;
     top: 0;
     left: 0;
-    transform: rotateY(-90deg) translateZ(0px);
 }
 
-.right-wall {
-    width: 60%;
-    height: 100%;
-    top: 0;
-    right: 0;
-    transform: rotateY(90deg) translateZ(240px);
-}
-
-.floor {
-    width: 100%;
-    height: 100%;
+.room-device {
     position: absolute;
-    bottom: 0;
-    background: linear-gradient(135deg, #E8D5B7 0%, #DBC49A 100%);
-    transform: rotateX(90deg) translateZ(0px);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10;
 }
 
-.furniture {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    top: 0;
-}
-
-.sofa {
-    position: absolute;
-    width: 80px;
-    height: 40px;
-    background: linear-gradient(135deg, #8B7355 0%, #6B5B44 100%);
-    border-radius: 8px;
-    bottom: 60px;
-    left: 60px;
-    transform: translateZ(10px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-}
-
-.coffee-table {
-    position: absolute;
-    width: 40px;
-    height: 25px;
-    background: linear-gradient(135deg, #A0845C 0%, #8B7355 100%);
+.room-device .device-icon {
+    width: 3vw;
+    height: 3vw;
+    min-width: 40px;
+    min-height: 40px;
+    max-width: 60px;
+    max-height: 60px;
+    background: rgba(255, 255, 255, 0.9);
     border-radius: 50%;
-    bottom: 80px;
-    left: 140px;
-    transform: translateZ(5px);
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(1vw + 12px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    transition: all 0.3s ease;
 }
 
-.side-table {
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    background: linear-gradient(135deg, #A0845C 0%, #8B7355 100%);
-    border-radius: 4px;
-    bottom: 120px;
-    right: 80px;
-    transform: translateZ(8px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+.room-device:hover .device-icon {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 }
 
-.plant {
+.room-device .device-status {
     position: absolute;
-    width: 15px;
-    height: 25px;
-    background: linear-gradient(135deg, #27AE60 0%, #1E8449 100%);
-    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-    bottom: 120px;
-    right: 60px;
-    transform: translateZ(12px);
+    top: -3px;
+    right: -3px;
+    width: 0.8vw;
+    height: 0.8vw;
+    min-width: 12px;
+    min-height: 12px;
+    max-width: 16px;
+    max-height: 16px;
+    border-radius: 50%;
+    background: #ddd;
+    border: 2px solid white;
+    transition: all 0.3s ease;
+}
+
+.room-device .device-status.active {
+    background: #FF1493;
+    box-shadow: 0 0 8px rgba(255, 20, 147, 0.6);
+}
+
+.robot-device .device-icon {
+    background: linear-gradient(135deg, #4A4A4A 0%, #2A2A2A 100%);
+    color: white;
+}
+
+.lamp-device .device-icon {
+    background: linear-gradient(135deg, #FFB6C1 0%, #FF69B4 100%);
+    color: white;
+}
+
+.speaker-device .device-icon {
+    background: linear-gradient(135deg, #87CEEB 0%, #4682B4 100%);
+    color: white;
+}
+
+/* Add Device Points */
+.add-device-points {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+
+.add-point {
+    position: absolute;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.add-point .add-icon {
+    width: 2.5vw;
+    height: 2.5vw;
+    min-width: 32px;
+    min-height: 32px;
+    max-width: 48px;
+    max-height: 48px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(0.8vw + 12px);
+    font-weight: bold;
+    color: #666;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    transition: all 0.3s ease;
+}
+
+.add-point:hover .add-icon {
+    background: rgba(255, 255, 255, 1);
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    color: #333;
+}
+
+/* Scent Visualization */
+.scent-visualizations {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+}
+
+.scent-area {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 20, 147, 0.2) 0%, rgba(255, 20, 147, 0.1) 50%, transparent 70%);
+    animation: scentPulse 3s infinite ease-in-out;
+    opacity: 0.8;
+}
+
+@keyframes scentPulse {
+    0%, 100% { 
+        transform: scale(1); 
+        opacity: 0.6; 
+    }
+    50% { 
+        transform: scale(1.2); 
+        opacity: 0.3; 
+    }
+}
+
+
+
+
+
+@keyframes scentBurst {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 0.8; }
+    50% { transform: translate(-50%, -50%) scale(1.5); opacity: 0.4; }
+    100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
+}
+
+/* Room Dots Navigation */
+.room-dots {
+    position: static;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 20px;
+    margin-bottom: 16px;
+    min-width: 60px;
+    transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+}
+
+.room-dots.slide-left {
+    transform: translateX(-32px);
+}
+
+.room-dots.slide-right {
+    transform: translateX(32px);
+}
+
+/* Room Label */
+.room-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: rgba(255, 153, 0, 0.9);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 16px;
+    box-shadow: 0 4px 16px rgba(255, 153, 0, 0.3);
+    margin-top: auto;
+}
+
+.room-icon {
+    font-size: 18px;
 }
 
 .bookshelf {
