@@ -534,27 +534,10 @@ class OdoraiApp {
         const scentBlend = document.getElementById('scent-blend');
         
         if (homePage) {
-            // Set background image directly without overlay
-            const backgroundImages = {
-                relax: 'assets/images/relax-bg.png',
-                focus: 'assets/images/focus-bg.jpg',
-                energize: 'assets/images/energize-bg.jpg'
-            };
-            
-            const bgImage = backgroundImages[this.currentMode];
-            if (bgImage) {
-                homePage.style.backgroundImage = `url('${bgImage}')`;
-                homePage.style.backgroundSize = 'cover';
-                homePage.style.backgroundPosition = 'center';
-                homePage.style.backgroundRepeat = 'no-repeat';
-            } else {
-                // Fallback to gradient if no image
-                homePage.style.background = mode.background;
-            }
-            
+            // The class name is already being set, which is the correct way to handle this.
+            // The javascript logic below was redundant and conflicting with the CSS.
             homePage.className = `page home-page active ${this.currentMode}-mode`;
             console.log(`設置模式: ${this.currentMode}-mode`);
-            console.log(`背景圖片: ${bgImage}`);
         }
         
         if (modeTitle) modeTitle.textContent = mode.name;

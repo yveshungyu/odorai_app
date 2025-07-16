@@ -672,16 +672,3 @@ body {
         height: 180px;
     }
 }
-
-/* Mode-specific backgrounds */
-.home-page.relax-mode {
-    background: linear-gradient(135deg, #FF6B95 0%, #FFA726 100%);
-}
-
-.home-page.focus-mode {
-    background: linear-gradient(135deg, #4FACFE 0%, #00F2FE 100%);
-}
-
-.home-page.energize-mode {
-    background: linear-gradient(135deg, #43E97B 0%, #38F9D7 100%);
-}
