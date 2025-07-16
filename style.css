@@ -160,8 +160,8 @@ body {
 .device-icon.diffuser {
     width: 210px;
     height: 210px;
-    bottom: 1439px !important; /* 1409 + 30 */
-    left: 394px !important; /* 364 + 30 */
+    bottom: 85% !important; /* Adjusted based on image */
+    left: 25% !important;  /* Adjusted based on image */
     right: auto !important;
     top: auto !important;
 }
@@ -169,8 +169,8 @@ body {
 .device-icon.lamp {
     width: 140px;
     height: 140px;
-    bottom: 339px !important; /* 334 + 5 */
-    left: 400px !important; /* 395 + 5 */
+    bottom: 60% !important; /* Adjusted based on image */
+    left: 75% !important;  /* Adjusted based on image */
     right: auto !important;
     top: auto !important;
 }
@@ -178,8 +178,8 @@ body {
 .device-icon.speaker {
     width: 140px;
     height: 140px;
-    bottom: 899px !important; /* 869 + 30 */
-    left: 1002px !important; /* 992 + 10 */
+    bottom: 15% !important; /* Adjusted based on image */
+    left: 30% !important;  /* Adjusted based on image */
     right: auto !important;
     top: auto !important;
 }
