@@ -6,7 +6,7 @@ class OdoraiApp {
         this.currentMode = 'relax';
         this.currentPage = 'home-page';
         this.devices = {
-            diffuser: false,
+            diffuser: true,
             lamp: false,
             speaker: false
         };
@@ -121,21 +121,9 @@ class OdoraiApp {
         this.setupModePageSwipe();
         
         // Add device button
-        const addBtn = document.querySelector('.add-device-btn');
-        if (addBtn) {
-            let isPaused = false;
-            addBtn.addEventListener('click', () => {
-                if (!window.odoraiApp || !window.odoraiApp.scentSystem) return;
-                if (isPaused) {
-                    window.odoraiApp.scentSystem.start();
-                    addBtn.classList.remove('paused');
-                } else {
-                    window.odoraiApp.scentSystem.stop();
-                    addBtn.classList.add('paused');
-                }
-                isPaused = !isPaused;
-            });
-        }
+        document.querySelector('.add-device-btn').addEventListener('click', () => {
+            this.showAddDeviceDialog();
+        });
         
         // Touch gestures for mobile
         this.setupTouchGestures();
@@ -310,11 +298,8 @@ class OdoraiApp {
     toggleDevice(deviceType) {
         this.devices[deviceType] = !this.devices[deviceType];
         this.updateDeviceUI();
-        // 新增：控制 scentSystem 的設備啟用/停用
-        if (this.scentSystem && typeof this.scentSystem.setDeviceActive === 'function') {
-            this.scentSystem.setDeviceActive(deviceType, this.devices[deviceType]);
-        }
         this.simulateDeviceResponse(deviceType);
+        
         // 新系統使用按鍵控制，不再需要點擊控制
         console.log(`💡 ${deviceType} 狀態切換，請使用按鍵控制氣味釋放:`);
         console.log('   按 1 = 薰衣草 (擴香器)');
@@ -330,15 +315,6 @@ class OdoraiApp {
                     deviceElement.classList.add('active');
                 } else {
                     deviceElement.classList.remove('active');
-                }
-                // 新增：顯示 OFF 狀態
-                const statusDiv = deviceElement.querySelector('.device-status');
-                if (statusDiv) {
-                    if (!this.devices[deviceType]) {
-                        statusDiv.textContent = 'OFF';
-                    } else {
-                        statusDiv.textContent = '';
-                    }
                 }
             }
         });
