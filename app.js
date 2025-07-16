@@ -76,7 +76,7 @@ class OdoraiApp {
     
     init() {
         console.log('Initializing ÔDÔRAI app components...');
-        this.updateTime();
+        // this.updateTime(); // REMOVED: This function caused a crash
         this.setupEventListeners();
         this.updateUI();
         this.startAutoTrigger();
@@ -84,8 +84,8 @@ class OdoraiApp {
         // 延遲氣味系統初始化直到位置恢復完成
         this.delayedInitScentSystem();
         
-        // Update time every second
-        setInterval(() => this.updateTime(), 1000);
+        // REMOVED: The related function was deleted
+        // setInterval(() => this.updateTime(), 1000); 
         
         // Simulate data updates every 30 seconds
         setInterval(() => this.updateStats(), 30000);
@@ -94,12 +94,12 @@ class OdoraiApp {
     }
     
     setupEventListeners() {
-        // Bottom navigation
-        document.querySelectorAll('.nav-item').forEach((item, index) => {
+        // Bottom navigation - Made more robust
+        document.querySelectorAll('.nav-item[data-page]').forEach(item => {
             item.addEventListener('click', () => {
-                if (index < 3) { // Only first 3 nav items are functional
-                    const pages = ['home-page', 'mode-page', 'spatial-page'];
-                    this.switchPage(pages[index]);
+                const pageId = item.dataset.page;
+                if (pageId) {
+                    this.switchPage(pageId);
                 }
             });
         });
@@ -157,21 +157,6 @@ class OdoraiApp {
         });
     }
     
-    updateTime() {
-        const now = new Date();
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        const timeString = `${hours}:${minutes}`;
-        
-        document.getElementById('current-time').textContent = timeString;
-        
-        // Update trigger time
-        const triggerTime = document.getElementById('trigger-time');
-        if (triggerTime) {
-            triggerTime.textContent = `${timeString} Trigger`;
-        }
-    }
-    
     switchPage(pageId) {
         // Hide all pages
         document.querySelectorAll('.page').forEach(page => {
@@ -181,15 +166,14 @@ class OdoraiApp {
         // Show selected page
         document.getElementById(pageId).classList.add('active');
         
-        // Update navigation
+        // Update navigation - Made more robust
         document.querySelectorAll('.nav-item').forEach(item => {
             item.classList.remove('active');
         });
         
-        const pages = ['home-page', 'mode-page', 'spatial-page'];
-        const pageIndex = pages.indexOf(pageId);
-        if (pageIndex >= 0) {
-            document.querySelectorAll('.nav-item')[pageIndex].classList.add('active');
+        const activeNavItem = document.querySelector(`.nav-item[data-page="${pageId}"]`);
+        if (activeNavItem) {
+            activeNavItem.classList.add('active');
         }
         
         this.currentPage = pageId;
@@ -552,9 +536,9 @@ class OdoraiApp {
         if (homePage) {
             // Set background image directly without overlay
             const backgroundImages = {
-                relax: './assets/images/relax-bg.png',
-                focus: './assets/images/focus-bg.jpg',
-                energize: './assets/images/energize-bg.jpg'
+                relax: 'assets/images/relax-bg.png',
+                focus: 'assets/images/focus-bg.jpg',
+                energize: 'assets/images/energize-bg.jpg'
             };
             
             const bgImage = backgroundImages[this.currentMode];

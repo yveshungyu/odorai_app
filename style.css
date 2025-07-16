@@ -14,6 +14,18 @@ body {
     padding: 0;
 }
 
+/* Scent Visualization Canvas - Re-adding this deleted section */
+#scent-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 2;
+    pointer-events: none;
+    opacity: 0.7;
+}
+
 /* Main Container */
 .app-container {
     height: 100vh;
@@ -51,22 +63,22 @@ body {
     background-repeat: no-repeat;
 }
 
-/* Background image overlays for each mode */
+/* Background image overlays for each mode - Fixing paths */
 .home-page.relax-mode {
-    background-image: url('./assets/images/relax-bg.png');
+    background-image: url('assets/images/relax-bg.png');
 }
 
 .home-page.focus-mode {
-    background-image: url('./assets/images/focus-bg.jpg');
+    background-image: url('assets/images/focus-bg.jpg');
 }
 
 .home-page.energize-mode {
-    background-image: url('./assets/images/energize-bg.jpg');
+    background-image: url('assets/images/energize-bg.jpg');
 }
 
 .ambient-overlay {
     position: absolute;
-    top: 60px;
+    top: 20px; /* Adjusting position from 60px */
     left: 20px;
     right: 20px;
     z-index: 1;
