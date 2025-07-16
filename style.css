@@ -315,8 +315,9 @@ body {
 .slide-out-left {
     animation: slideOutLeft 0.4s forwards;
 }
-.slide-out-right {
-    animation: slideOutRight 0.4s forwards;
+@keyframes slideOutRight {
+    from { transform: translateX(0); opacity: 1; }
+    to   { transform: translateX(100%); opacity: 0; }
 }
 
 @keyframes slideInLeft {
@@ -331,10 +332,6 @@ body {
     from { transform: translateX(0); opacity: 1; }
     to   { transform: translateX(-100%); opacity: 0; }
 }
-@keyframes slideOutRight {
-    from { transform: translateX(0); opacity: 1; }
-    to   { transform: translateX(100%); opacity: 0; }
-}
 
 .scent-visual {
     display: none; /* Hide the SVG particles as per the new design */
@@ -348,6 +345,14 @@ body {
     gap: 12px;
     margin-top: 12px;
     margin-bottom: 16px;
+    min-width: 60px;
+    transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+}
+.mode-dots.slide-left {
+    transform: translateX(-32px);
+}
+.mode-dots.slide-right {
+    transform: translateX(32px);
 }
 
 .dot {
@@ -357,8 +362,8 @@ body {
     border: 2px solid #222;
     background: transparent;
     box-sizing: border-box;
+    transition: background 0.3s, border 0.3s;
 }
-
 .dot.middle {
     background: #222;
     border: 2px solid #222;

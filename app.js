@@ -209,6 +209,13 @@ class OdoraiApp {
         // 決定動畫 class
         const outClass = direction === 'next' ? 'slide-out-left' : 'slide-out-right';
         const inClass = direction === 'next' ? 'slide-in-right' : 'slide-in-left';
+        // dots 動畫
+        const modeDots = document.querySelector('.mode-dots');
+        if (modeDots) {
+            modeDots.classList.remove('slide-left', 'slide-right');
+            void modeDots.offsetWidth; // 強制 reflow
+            modeDots.classList.add(direction === 'next' ? 'slide-right' : 'slide-left');
+        }
         // 計算新 mode
         const modeKeys = Object.keys(this.modes);
         const currentIndex = modeKeys.indexOf(this.currentMode);
@@ -238,7 +245,7 @@ class OdoraiApp {
         // 動畫結束後，切換 mode、移除舊圓形、移除新圓形動畫 class
         setTimeout(() => {
             this.currentMode = newMode;
-            this.updateUI(); // 只更新下方資訊，不動圓形
+            this.updateUI(); // dots 會重設
             wrapper.removeChild(oldCircle);
             newCircle.classList.remove('slide-in-left', 'slide-in-right');
         }, 400);
@@ -665,6 +672,22 @@ class OdoraiApp {
                 }
                 modeCircle.className = 'mode-circle'; // 移除動畫 class
             }
+        }
+        
+        // Update mode dots
+        const modeDots = document.querySelector('.mode-dots');
+        if (modeDots) {
+            // 動態產生三顆點，讓中間的 always active
+            const modeKeys = Object.keys(this.modes);
+            const currentIndex = modeKeys.indexOf(this.currentMode);
+            let dotsHtml = '';
+            for (let i = -1; i <= 1; i++) {
+                let idx = (currentIndex + i + modeKeys.length) % modeKeys.length;
+                let dotClass = i === 0 ? 'dot middle' : 'dot';
+                dotsHtml += `<div class="${dotClass}"></div>`;
+            }
+            modeDots.innerHTML = dotsHtml;
+            modeDots.classList.remove('slide-left', 'slide-right');
         }
         
         // Update stats
