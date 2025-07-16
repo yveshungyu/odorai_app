@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ÔDÔRAI - Scent Intelligence</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Status Bar -->
+    <div class="status-bar">
+        <span class="time" id="current-time">01:08</span>
+        <div class="status-icons">
+            <div class="signal-icon">
+                <div class="signal-bars">
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                </div>
+            </div>
+            <span class="network">5G</span>
+            <span class="battery">68</span>
+        </div>
+    </div>
+
+    <!-- Scent Visualization Canvas -->
+    <canvas id="scent-canvas"></canvas>
+
+    <!-- Main Container -->
+    <div class="app-container">
+        <!-- Home Page - Trigger Interface -->
+        <div class="page home-page active" id="home-page">
+            <div class="ambient-overlay">
+                <p class="ambient-text">
+                    started diffusing on its own.<br>
+                    Seriously? Did you set it up that<br>
+                    way? Nope, I think it detected <span class="highlight">my<br>
+                    heart rate</span> or something... this is <span class="highlight">like<br>
+                    the third time today</span>. Can we switch
+                </p>
+            </div>
+
+            <div class="mode-display">
+                <h1 class="mode-title" id="home-mode-title">RELAX</h1>
+                <p class="trigger-time" id="trigger-time">16:53 Trigger</p>
+            </div>
+
+            <div class="device-grid">
+                <div class="device-icon diffuser active" data-device="diffuser">
+                    <img src="assets/images/diffuser.png" alt="Diffuser" class="device-img">
+                </div>
+                <div class="device-icon lamp" data-device="lamp">
+                    <img src="assets/images/lamp.png" alt="Lamp" class="device-img">
+                </div>
+                <div class="device-icon speaker" data-device="speaker">
+                    <img src="assets/images/speaker.png" alt="Speaker" class="device-img">
+                </div>
+            </div>
+
+            <button class="add-device-btn">
+                <span class="plus-icon">+</span>
+            </button>
+        </div>
+
+        <!-- Mode Page -->
+        <div class="page mode-page" id="mode-page">
+            <div class="mode-circle">
+                <div class="scent-visual">
+                    <div class="scent-particles"></div>
+                </div>
+                <div class="mode-dots">
+                    <div class="dot active"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+            </div>
+
+            <div class="mode-info">
+                <p class="current-mode-label">Current Mode</p>
+                <h2 class="mode-name" id="mode-name">RELAX</h2>
+                <p class="scent-blend" id="scent-blend">Lavender + Bergamot + Cedarwood</p>
+            </div>
+
+            <div class="stats-container">
+                <div class="stat-row">
+                    <div class="stat-label">Alarm | Wake up</div>
+                    <div class="stat-value">AM 07:03</div>
+                </div>
+                <div class="stat-row sleep-stat">
+                    <div class="stat-label">Sleep | Total time</div>
+                    <div class="stat-value">
+                        <span class="change-indicator">+2.2%</span>
+                        <span class="time-value">8hr 48m</span>
+                    </div>
+                </div>
+                <div class="stat-row focus-stat">
+                    <div class="stat-label">Focus</div>
+                    <div class="stat-value">
+                        <span class="change-indicator positive">+5.8%</span>
+                        <span class="time-value">1hr 03m</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Spatial Page -->
+        <div class="page spatial-page" id="spatial-page">
+            <div class="room-container">
+                <div class="isometric-room">
+                    <!-- Room structure -->
+                    <div class="room-walls">
+                        <div class="wall back-wall"></div>
+                        <div class="wall left-wall"></div>
+                        <div class="wall right-wall"></div>
+                        <div class="floor"></div>
+                    </div>
+                    
+                    <!-- Furniture -->
+                    <div class="furniture">
+                        <div class="sofa"></div>
+                        <div class="coffee-table"></div>
+                        <div class="side-table"></div>
+                        <div class="plant"></div>
+                        <div class="bookshelf"></div>
+                        <div class="chair"></div>
+                    </div>
+                    
+                    <!-- Diffuser and scent zones -->
+                    <div class="diffuser-device active"></div>
+                    <div class="scent-zones">
+                        <div class="scent-zone zone-1"></div>
+                        <div class="scent-zone zone-2"></div>
+                        <div class="scent-zone zone-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <div class="nav-item active" data-page="home-page">
+            <div class="nav-icon home-icon"></div>
+        </div>
+        <div class="nav-item" data-page="mode-page">
+            <div class="nav-icon mode-icon"></div>
+        </div>
+        <div class="nav-item" data-page="spatial-page">
+            <div class="nav-icon spatial-icon"></div>
+        </div>
+        <div class="nav-item">
+            <div class="nav-icon profile-icon"></div>
+        </div>
+    </div>
+
+    <script src="correct-scent-system.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
