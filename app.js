@@ -38,7 +38,7 @@ class OdoraiApp {
         this.modes = {
             relax: {
                 name: 'RELAX',
-                blend: 'Lavender + Bergamot + Cedarwood',
+                blend: 'Jasmine + Lavender + Frankincense',
                 background: 'linear-gradient(135deg, #FF6B95 0%, #FFA726 100%)',
                 color: '#FF6B95'
             },
@@ -117,10 +117,8 @@ class OdoraiApp {
             this.cycleModes();
         });
         
-        // Mode circle interaction
-        document.querySelector('.mode-circle').addEventListener('click', () => {
-            this.cycleModes();
-        });
+        // Mode-page swipe for mode switching only
+        this.setupModePageSwipe();
         
         // Add device button
         document.querySelector('.add-device-btn').addEventListener('click', () => {
@@ -137,18 +135,29 @@ class OdoraiApp {
     setupTouchGestures() {
         let startX = 0;
         let startY = 0;
-        
-        document.addEventListener('touchstart', (e) => {
+        const appContainer = document.querySelector('.app-container');
+
+        if (!appContainer) return;
+
+        appContainer.addEventListener('touchstart', (e) => {
+            // Don't start a swipe if the target is an interactive element or content block
+            if (e.target.closest('button, .nav-item, .device-icon, .mode-circle, .info-icon, .stats-container, .mode-info')) {
+                startX = null;
+                startY = null;
+                return;
+            }
             startX = e.touches[0].clientX;
             startY = e.touches[0].clientY;
-        });
-        
-        document.addEventListener('touchend', (e) => {
+        }, { passive: true }); // Use passive for better scroll performance
+
+        appContainer.addEventListener('touchend', (e) => {
+            if (startX === null) return; // Swipe was not initiated
+
             const endX = e.changedTouches[0].clientX;
             const endY = e.changedTouches[0].clientY;
             const diffX = startX - endX;
             const diffY = startY - endY;
-            
+
             // Horizontal swipe detection
             if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
                 if (diffX > 0) {
@@ -157,6 +166,45 @@ class OdoraiApp {
                     this.prevPage();
                 }
             }
+            
+            // Reset for the next touch
+            startX = null;
+            startY = null;
+        });
+    }
+    
+    setupModePageSwipe() {
+        const modePage = document.getElementById('mode-page');
+        if (!modePage) return;
+        let startX = null;
+        let startY = null;
+        modePage.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 1) return;
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+        }, { passive: true });
+        modePage.addEventListener('touchend', (e) => {
+            if (startX === null) return;
+            const endX = e.changedTouches[0].clientX;
+            const endY = e.changedTouches[0].clientY;
+            const diffX = startX - endX;
+            const diffY = startY - endY;
+            // 只偵測水平滑動且距離夠大
+            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+                if (diffX > 0) {
+                    this.cycleModes(); // 右滑到下一個
+                } else {
+                    // 左滑到上一個
+                    const modeKeys = Object.keys(this.modes);
+                    const currentIndex = modeKeys.indexOf(this.currentMode);
+                    const prevIndex = (currentIndex - 1 + modeKeys.length) % modeKeys.length;
+                    this.currentMode = modeKeys[prevIndex];
+                    this.updateUI();
+                    this.triggerModeAnimation();
+                }
+            }
+            startX = null;
+            startY = null;
         });
     }
     
@@ -552,9 +600,10 @@ class OdoraiApp {
         const scentBlend = document.getElementById('scent-blend');
         
         if (homePage) {
-            // Only update the mode text, no longer change the background class.
-            homePage.className = 'page home-page active';
-            console.log(`設置模式: ${this.currentMode}-mode`);
+            // This line was incorrectly making the home page active during any mode change.
+            // It has been removed to fix the page switching bug.
+            // homePage.className = 'page home-page active';
+            console.log(`UI updated for mode: ${this.currentMode}`);
         }
         
         if (modeTitle) modeTitle.textContent = mode.name;

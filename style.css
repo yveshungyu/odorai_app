@@ -240,91 +240,111 @@ body {
 
 /* Mode Page Styles */
 .mode-page {
-    background: linear-gradient(135deg, #E8D5FF 0%, #FFE0F0 100%);
+    background: #f8f8f8; /* A very light grey, almost white */
+    align-items: center;
+    justify-content: flex-start; /* Align to the top */
+    padding: 60px 20px;
+    position: relative; /* Needed for positioning the info icon */
+}
+
+.info-icon {
+    position: absolute;
+    top: 60px;
+    right: 40px;
+    width: 32px;
+    height: 32px;
+    border: 2px solid #ccc;
+    border-radius: 50%;
+    display: flex;
     align-items: center;
     justify-content: center;
-    padding: 40px 20px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #ccc;
+    cursor: pointer;
 }
 
 .mode-circle {
-    width: 200px;
-    height: 200px;
+    width: 250px; /* Larger circle for iPad */
+    height: 250px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #8B7ED8 0%, #B794F6 100%);
+    background-color: #e0e5ec;
     position: relative;
     margin: 40px 0;
     overflow: hidden;
-    box-shadow: 0 20px 60px rgba(139, 126, 216, 0.4);
+    box-shadow: 
+        -7px -7px 20px 0px #fff9,
+        7px 7px 20px 0px #0001,
+        inset -4px -4px 10px 0px #fff9,
+        inset 4px 4px 10px 0px #0001;
+    background-image: url('assets/images/relax-bg.png'); /* Using the image from the design */
+    background-size: cover;
+    background-position: center;
 }
 
 .scent-visual {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><circle cx="60" cy="70" r="8" fill="rgba(255,255,255,0.3)" opacity="0.8"/><circle cx="140" cy="120" r="6" fill="rgba(255,255,255,0.4)" opacity="0.6"/><circle cx="100" cy="160" r="7" fill="rgba(255,255,255,0.35)" opacity="0.7"/><circle cx="40" cy="130" r="5" fill="rgba(255,255,255,0.5)" opacity="0.5"/><circle cx="160" cy="60" r="9" fill="rgba(255,255,255,0.25)" opacity="0.9"/></svg>');
-    background-size: cover;
-    animation: float 8s ease-in-out infinite;
-}
-
-@keyframes float {
-    0%, 100% { transform: translateY(0px) rotate(0deg); }
-    25% { transform: translateY(-10px) rotate(90deg); }
-    50% { transform: translateY(-20px) rotate(180deg); }
-    75% { transform: translateY(-10px) rotate(270deg); }
+    display: none; /* Hide the SVG particles as per the new design */
 }
 
 .mode-dots {
-    position: absolute;
-    bottom: 15px;
-    left: 50%;
-    transform: translateX(-50%);
+    position: static;
     display: flex;
-    gap: 8px;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 24px;
+    margin-bottom: 16px;
 }
 
 .dot {
-    width: 8px;
-    height: 8px;
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.4);
-    transition: all 0.3s ease;
+    border: 2px solid #222;
+    background: transparent;
+    box-sizing: border-box;
+}
+
+.dot.middle {
+    background: #222;
+    border: 2px solid #222;
 }
 
 .dot.active {
-    background: rgba(255, 255, 255, 0.9);
+    background: black;
+    border-color: black;
 }
 
 .mode-info {
     text-align: center;
-    margin-bottom: 40px;
+    margin-top: 20px; /* Reduced margin */
+    margin-bottom: 50px;
 }
 
 .current-mode-label {
-    font-size: 14px;
-    color: #8B7ED8;
-    margin-bottom: 8px;
+    font-size: 16px;
+    color: #888;
+    margin-bottom: 12px;
     font-weight: 500;
 }
 
 .mode-name {
-    font-size: 42px;
+    font-size: 48px; /* Larger font size */
     font-weight: 800;
     color: #333;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
     letter-spacing: 2px;
 }
 
 .scent-blend {
-    font-size: 14px;
+    font-size: 18px; /* Larger font size */
     color: #666;
     font-weight: 500;
 }
 
 .stats-container {
     width: 100%;
-    max-width: 320px;
+    max-width: 480px; /* Wider for iPad */
     margin: 0 auto;
 }
 
@@ -332,16 +352,20 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px 0;
-    border-bottom: 1px solid rgba(139, 126, 216, 0.2);
+    padding: 25px 20px; /* Increased padding */
+    border-radius: 20px;
+    background-color: #fff;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 
 .stat-row:last-child {
     border-bottom: none;
+    margin-bottom: 0;
 }
 
 .stat-label {
-    font-size: 16px;
+    font-size: 18px; /* Larger font size */
     color: #333;
     font-weight: 500;
 }
@@ -349,16 +373,16 @@ body {
 .stat-value {
     display: flex;
     align-items: center;
-    gap: 12px;
-    font-size: 18px;
+    gap: 16px; /* Increased gap */
+    font-size: 20px; /* Larger font size */
     color: #333;
     font-weight: 600;
 }
 
 .change-indicator {
-    font-size: 14px;
-    color: #E74C3C;
+    font-size: 16px;
     font-weight: 500;
+    color: #E74C3C;
 }
 
 .change-indicator.positive {
@@ -366,7 +390,7 @@ body {
 }
 
 .time-value {
-    font-size: 18px;
+    font-size: 20px; /* Larger font size */
     color: #333;
 }
 
