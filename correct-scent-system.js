@@ -193,9 +193,9 @@ class PhysicalScentSystem {
      */
     setupAutoTriggerSystem() {
         this.autoTriggerConfig = {
-            1: { work: 90000, rest: 10000 }, // 1.5 分鐘工作, 10秒休息
-            2: { work: 60000, rest: 10000 }, // 1 分鐘工作, 10秒休息
-            3: { work: 50000, rest: 10000 }  // 50秒工作, 10秒休息
+            1: { work: 30000, rest: 20000 }, // 30秒工作, 20秒休息
+            2: { work: 20000, rest: 15000 }, // 20秒工作, 15秒休息
+            3: { work: 20000, rest: 20000 }  // 20秒工作, 20秒休息
         };
     
         this.autoTriggerState = {};
