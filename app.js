@@ -192,20 +192,46 @@ class OdoraiApp {
             // 只偵測水平滑動且距離夠大
             if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
                 if (diffX > 0) {
-                    this.cycleModes(); // 右滑到下一個
+                    this.animateModeSwitch('next');
                 } else {
-                    // 左滑到上一個
-                    const modeKeys = Object.keys(this.modes);
-                    const currentIndex = modeKeys.indexOf(this.currentMode);
-                    const prevIndex = (currentIndex - 1 + modeKeys.length) % modeKeys.length;
-                    this.currentMode = modeKeys[prevIndex];
-                    this.updateUI();
-                    this.triggerModeAnimation();
+                    this.animateModeSwitch('prev');
                 }
             }
             startX = null;
             startY = null;
         });
+    }
+
+    animateModeSwitch(direction) {
+        const modeCircle = document.querySelector('.mode-circle');
+        if (!modeCircle) return;
+        // 決定動畫 class
+        const outClass = direction === 'next' ? 'slide-out-left' : 'slide-out-right';
+        const inClass = direction === 'next' ? 'slide-in-right' : 'slide-in-left';
+        // 先加上 outClass
+        modeCircle.classList.remove('slide-in-left', 'slide-in-right', 'slide-out-left', 'slide-out-right');
+        modeCircle.classList.add(outClass);
+        // 切換 mode
+        setTimeout(() => {
+            // 切換 mode index
+            const modeKeys = Object.keys(this.modes);
+            const currentIndex = modeKeys.indexOf(this.currentMode);
+            let newIndex;
+            if (direction === 'next') {
+                newIndex = (currentIndex + 1) % modeKeys.length;
+            } else {
+                newIndex = (currentIndex - 1 + modeKeys.length) % modeKeys.length;
+            }
+            this.currentMode = modeKeys[newIndex];
+            this.updateUI();
+            // 先移除 outClass，馬上加 inClass
+            modeCircle.classList.remove('slide-out-left', 'slide-out-right');
+            modeCircle.classList.add(inClass);
+            // 移除 inClass
+            setTimeout(() => {
+                modeCircle.classList.remove('slide-in-left', 'slide-in-right');
+            }, 400);
+        }, 400);
     }
     
     switchPage(pageId) {
@@ -307,7 +333,7 @@ class OdoraiApp {
         console.log(`位置編輯模式: ${this.positionEditMode ? '開啟' : '關閉'}`);
         if (this.positionEditMode) {
             console.log('🎯 現在可以拖拽所有 3 個設備圖標！');
-            console.log('📍 擴香器 (diffuser) | 燈光 (lamp) | 音響 (speaker)');
+            console.log('�� 擴香器 (diffuser) | 燈光 (lamp) | 音響 (speaker)');
         }
         return this.positionEditMode;
     }

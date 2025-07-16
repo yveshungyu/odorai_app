@@ -244,15 +244,15 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     min-height: 100vh;
-    padding: 60px 20px 0 20px;
+    padding: 0 20px 0 20px;
     position: relative;
 }
 
 .info-icon {
     position: absolute;
-    top: 60px;
+    top: 48px;
     right: 40px;
     width: 32px;
     height: 32px;
@@ -265,16 +265,33 @@ body {
     font-weight: bold;
     color: #ccc;
     cursor: pointer;
+    background: #fff;
+    z-index: 10;
+}
+
+.mode-page .mode-circle-wrapper {
+    margin-top: 48px;
+}
+
+.mode-circle-wrapper {
+    width: 332px;
+    height: 332px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    margin: 0 auto;
 }
 
 .mode-circle {
     width: 332px;
-    height: 400px;
-    border-radius: 48% / 50%; /* 1108:1336 比例的橢圓 */
+    height: 332px;
+    border-radius: 50%;
     background-color: #e0e5ec;
-    position: relative;
-    margin: 0 auto;
-    overflow: hidden;
+    position: absolute;
+    left: 0;
+    top: 0;
     box-shadow: 
         -7px -7px 20px 0px #fff9,
         7px 7px 20px 0px #0001,
@@ -286,6 +303,37 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: transform 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.4s cubic-bezier(0.4,0,0.2,1);
+}
+
+.slide-in-left {
+    animation: slideInLeft 0.4s forwards;
+}
+.slide-in-right {
+    animation: slideInRight 0.4s forwards;
+}
+.slide-out-left {
+    animation: slideOutLeft 0.4s forwards;
+}
+.slide-out-right {
+    animation: slideOutRight 0.4s forwards;
+}
+
+@keyframes slideInLeft {
+    from { transform: translateX(-100%); opacity: 0; }
+    to   { transform: translateX(0); opacity: 1; }
+}
+@keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to   { transform: translateX(0); opacity: 1; }
+}
+@keyframes slideOutLeft {
+    from { transform: translateX(0); opacity: 1; }
+    to   { transform: translateX(-100%); opacity: 0; }
+}
+@keyframes slideOutRight {
+    from { transform: translateX(0); opacity: 1; }
+    to   { transform: translateX(100%); opacity: 0; }
 }
 
 .scent-visual {
@@ -706,9 +754,22 @@ body {
         height: 350px;
     }
     
+    .mode-circle-wrapper {
+        width: 220px;
+        height: 220px;
+    }
     .mode-circle {
         width: 220px;
-        height: 265px;
-        border-radius: 48% / 50%;
+        height: 220px;
+    }
+    .info-icon {
+        top: 24px;
+        right: 20px;
+        width: 28px;
+        height: 28px;
+        font-size: 16px;
+    }
+    .mode-page .mode-circle-wrapper {
+        margin-top: 24px;
     }
 }
