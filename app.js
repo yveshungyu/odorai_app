@@ -203,34 +203,44 @@ class OdoraiApp {
     }
 
     animateModeSwitch(direction) {
-        const modeCircle = document.querySelector('.mode-circle');
-        if (!modeCircle) return;
+        const wrapper = document.querySelector('.mode-circle-wrapper');
+        const oldCircle = wrapper.querySelector('.mode-circle');
+        if (!oldCircle) return;
         // 決定動畫 class
         const outClass = direction === 'next' ? 'slide-out-left' : 'slide-out-right';
         const inClass = direction === 'next' ? 'slide-in-right' : 'slide-in-left';
-        // 先加上 outClass
-        modeCircle.classList.remove('slide-in-left', 'slide-in-right', 'slide-out-left', 'slide-out-right');
-        modeCircle.classList.add(outClass);
-        // 切換 mode
+        // 計算新 mode
+        const modeKeys = Object.keys(this.modes);
+        const currentIndex = modeKeys.indexOf(this.currentMode);
+        let newIndex;
+        if (direction === 'next') {
+            newIndex = (currentIndex + 1) % modeKeys.length;
+        } else {
+            newIndex = (currentIndex - 1 + modeKeys.length) % modeKeys.length;
+        }
+        const newMode = modeKeys[newIndex];
+        // 建立新圓形
+        const newCircle = document.createElement('div');
+        newCircle.className = 'mode-circle ' + inClass;
+        // 設定新圓形背景
+        if (newMode === 'relax') {
+            newCircle.style.backgroundImage = "url('assets/images/relax-bg.png')";
+        } else if (newMode === 'focus') {
+            newCircle.style.backgroundImage = "url('assets/images/lamp.png')";
+        } else if (newMode === 'energize') {
+            newCircle.style.backgroundImage = "url('assets/images/speaker.png')";
+        }
+        // 插入新圓形
+        wrapper.appendChild(newCircle);
+        // 舊圓形加滑出動畫
+        oldCircle.classList.remove('slide-in-left', 'slide-in-right', 'slide-out-left', 'slide-out-right');
+        oldCircle.classList.add(outClass);
+        // 動畫結束後，切換 mode、移除舊圓形、移除新圓形動畫 class
         setTimeout(() => {
-            // 切換 mode index
-            const modeKeys = Object.keys(this.modes);
-            const currentIndex = modeKeys.indexOf(this.currentMode);
-            let newIndex;
-            if (direction === 'next') {
-                newIndex = (currentIndex + 1) % modeKeys.length;
-            } else {
-                newIndex = (currentIndex - 1 + modeKeys.length) % modeKeys.length;
-            }
-            this.currentMode = modeKeys[newIndex];
-            this.updateUI();
-            // 先移除 outClass，馬上加 inClass
-            modeCircle.classList.remove('slide-out-left', 'slide-out-right');
-            modeCircle.classList.add(inClass);
-            // 移除 inClass
-            setTimeout(() => {
-                modeCircle.classList.remove('slide-in-left', 'slide-in-right');
-            }, 400);
+            this.currentMode = newMode;
+            this.updateUI(); // 只更新下方資訊，不動圓形
+            wrapper.removeChild(oldCircle);
+            newCircle.classList.remove('slide-in-left', 'slide-in-right');
         }, 400);
     }
     
@@ -636,10 +646,25 @@ class OdoraiApp {
         if (modeName) modeName.textContent = mode.name;
         if (scentBlend) scentBlend.textContent = mode.blend;
         
-        // Update mode circle color
-        const modeCircle = document.querySelector('.mode-circle');
-        if (modeCircle) {
-            modeCircle.style.background = `linear-gradient(135deg, ${mode.color} 0%, ${mode.color}CC 100%)`;
+        // Update mode circle background
+        const wrapper = document.querySelector('.mode-circle-wrapper');
+        if (wrapper) {
+            // 只保留一個 mode-circle
+            let circles = wrapper.querySelectorAll('.mode-circle');
+            if (circles.length > 1) {
+                for (let i = 0; i < circles.length - 1; i++) wrapper.removeChild(circles[i]);
+            }
+            const modeCircle = wrapper.querySelector('.mode-circle');
+            if (modeCircle) {
+                if (this.currentMode === 'relax') {
+                    modeCircle.style.backgroundImage = "url('assets/images/relax-bg.png')";
+                } else if (this.currentMode === 'focus') {
+                    modeCircle.style.backgroundImage = "url('assets/images/lamp.png')";
+                } else if (this.currentMode === 'energize') {
+                    modeCircle.style.backgroundImage = "url('assets/images/speaker.png')";
+                }
+                modeCircle.className = 'mode-circle'; // 移除動畫 class
+            }
         }
         
         // Update stats
