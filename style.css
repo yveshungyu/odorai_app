@@ -178,8 +178,8 @@ body {
 
 .device-icon.speaker {
     /* Took styles from Lamp */
-    width: 112px;
-    height: 112px;
+    width: 140px; /* Match Lamp's size */
+    height: 140px; /* Match Lamp's size */
     bottom: calc(50% - 15px) !important;
     left: calc(76% - 30px) !important;
     right: auto !important;

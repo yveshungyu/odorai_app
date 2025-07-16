@@ -267,14 +267,18 @@ class PhysicalScentSystem {
         // 將前端設備名稱映射到按鍵編號
         const deviceMapping = {
             'diffuser': 1,  // 擴香器 -> 按鍵1 薰衣草
-            'lamp': 2,      // 燈光 -> 按鍵2 柑橘
-            'speaker': 3    // 音響 -> 按鍵3 尤加利
+            'lamp': 3,      // 燈光 -> 按鍵3 尤加利 (Note: Speaker and Lamp are swapped)
+            'speaker': 2    // 音響 -> 按鍵2 柑橘
         };
         
         for (const [deviceKey, position] of Object.entries(positions)) {
             const deviceNum = deviceMapping[deviceKey];
             if (deviceNum && deviceNum in this.scentDevices) {
-                this.scentDevices[deviceNum].position = [...position];
+                // The incoming position is [centerX, centerY] from the top-left of the viewport.
+                // The scent system's y-axis might be different, so we ensure it's mapped correctly.
+                // In this case, the system seems to expect coordinates relative to the canvas,
+                // which is full-screen, so a direct mapping should work.
+                this.scentDevices[deviceNum].position = [...position]; 
                 console.log(`📍 按鍵${deviceNum} (${this.scentDevices[deviceNum].scentType}) 位置更新: [${position[0]}, ${position[1]}]`);
             }
         }

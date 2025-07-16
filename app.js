@@ -129,6 +129,9 @@ class OdoraiApp {
         
         // Touch gestures for mobile
         this.setupTouchGestures();
+        
+        // Add resize listener to keep scent points in sync
+        window.addEventListener('resize', () => this.syncScentDevicePositions());
     }
     
     setupTouchGestures() {
@@ -493,9 +496,24 @@ class OdoraiApp {
     }
     
     syncScentDevicePositions() {
-        // 位置已在氣味系統中固定，不需要同步
-        console.log('✅ 氣味設備位置已固定，無需同步');
-        return;
+        if (!this.scentSystem) {
+            console.warn('⚠️ 氣味系統尚未初始化，無法同步位置');
+            return;
+        }
+
+        const positions = {};
+        document.querySelectorAll('.device-icon[data-device]').forEach(icon => {
+            const deviceType = icon.dataset.device;
+            const rect = icon.getBoundingClientRect();
+            // Get the center of the icon and provide it to the scent system
+            positions[deviceType] = [
+                rect.left + rect.width / 2,  // centerX
+                rect.top + rect.height / 2   // centerY
+            ];
+        });
+        
+        this.scentSystem.updateDevicePositions(positions);
+        console.log('✅ 氣味釋放點已與按鈕位置同步');
     }
     
     simulateDeviceResponse(deviceType) {
