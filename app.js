@@ -214,6 +214,16 @@ class OdoraiApp {
         if (modeDots) {
             modeDots.classList.remove('slide-left', 'slide-right');
             void modeDots.offsetWidth; // 強制 reflow
+            // --- 新增：動畫開始時，實心點移到旁邊 ---
+            const dots = Array.from(modeDots.children);
+            if (dots.length === 3) {
+                dots.forEach(dot => dot.classList.remove('middle'));
+                if (direction === 'next') {
+                    dots[2].classList.add('middle'); // 右邊變實心
+                } else {
+                    dots[0].classList.add('middle'); // 左邊變實心
+                }
+            }
             modeDots.classList.add(direction === 'next' ? 'slide-right' : 'slide-left');
         }
         // 計算新 mode
@@ -229,14 +239,14 @@ class OdoraiApp {
         // 建立新圓形
         const newCircle = document.createElement('div');
         newCircle.className = 'mode-circle ' + inClass;
-        // 設定新圓形背景
-        if (newMode === 'relax') {
-            newCircle.style.backgroundImage = "url('assets/images/relax-bg.png')";
-        } else if (newMode === 'focus') {
-            newCircle.style.backgroundImage = "url('assets/images/lamp.png')";
-        } else if (newMode === 'energize') {
-            newCircle.style.backgroundImage = "url('assets/images/speaker.png')";
-        }
+        // 設定新圓形純色
+        const modeColors = {
+            relax: '#FF6B95',
+            focus: '#4FACFE',
+            energize: '#43E97B'
+        };
+        newCircle.style.backgroundColor = modeColors[newMode];
+        newCircle.style.backgroundImage = '';
         // 插入新圓形
         wrapper.appendChild(newCircle);
         // 舊圓形加滑出動畫
@@ -245,9 +255,13 @@ class OdoraiApp {
         // 動畫結束後，切換 mode、移除舊圓形、移除新圓形動畫 class
         setTimeout(() => {
             this.currentMode = newMode;
-            this.updateUI(); // dots 會重設
+            // dots 結構在動畫結束後才重設
+            this.updateUI();
             wrapper.removeChild(oldCircle);
             newCircle.classList.remove('slide-in-left', 'slide-in-right');
+            if (modeDots) {
+                modeDots.classList.remove('slide-left', 'slide-right');
+            }
         }, 400);
     }
     
@@ -663,13 +677,14 @@ class OdoraiApp {
             }
             const modeCircle = wrapper.querySelector('.mode-circle');
             if (modeCircle) {
-                if (this.currentMode === 'relax') {
-                    modeCircle.style.backgroundImage = "url('assets/images/relax-bg.png')";
-                } else if (this.currentMode === 'focus') {
-                    modeCircle.style.backgroundImage = "url('assets/images/lamp.png')";
-                } else if (this.currentMode === 'energize') {
-                    modeCircle.style.backgroundImage = "url('assets/images/speaker.png')";
-                }
+                // 根據 mode 設定純色
+                const modeColors = {
+                    relax: '#FF6B95',
+                    focus: '#4FACFE',
+                    energize: '#43E97B'
+                };
+                modeCircle.style.backgroundColor = modeColors[this.currentMode];
+                modeCircle.style.backgroundImage = '';
                 modeCircle.className = 'mode-circle'; // 移除動畫 class
             }
         }
