@@ -158,19 +158,19 @@ body {
 
 /* 設置不同設備的尺寸 */
 .device-icon.diffuser {
-    width: 210px;
-    height: 210px;
-    bottom: 85% !important; /* Adjusted based on image */
-    left: 25% !important;  /* Adjusted based on image */
+    width: 168px;  /* Scaled to 80% (210px -> 168px) */
+    height: 168px; /* Scaled to 80% (210px -> 168px) */
+    bottom: 68% !important; /* Moved down a bit (70% -> 68%) */
+    left: 28% !important;  /* Moved right a bit (25% -> 28%) */
     right: auto !important;
     top: auto !important;
 }
 
 .device-icon.lamp {
-    width: 140px;
-    height: 140px;
-    bottom: 60% !important; /* Adjusted based on image */
-    left: 75% !important;  /* Adjusted based on image */
+    width: 112px;
+    height: 112px;
+    bottom: 46% !important; /* Moved down by its own size (58% -> 46%) */
+    left: 78% !important;
     right: auto !important;
     top: auto !important;
 }
