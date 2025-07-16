@@ -160,8 +160,8 @@ body {
 .device-icon.diffuser {
     width: 168px;
     height: 168px;
-    bottom: 65% !important; /* Final adjustment: down */
-    left: 26% !important;  /* Final adjustment: left */
+    bottom: calc(65% + 185px) !important; /* Moved up by 1.1x its size (168 * 1.1) */
+    left: calc(26% + 10px) !important;  /* Moved right by 10px */
     right: auto !important;
     top: auto !important;
 }
@@ -169,8 +169,8 @@ body {
 .device-icon.lamp {
     width: 112px;
     height: 112px;
-    bottom: 50% !important; /* Final adjustment: up */
-    left: 76% !important;  /* Final adjustment: left */
+    bottom: calc(50% - 5px) !important; /* Moved down by 5px */
+    left: calc(76% - 10px) !important;  /* Moved left by 10px */
     right: auto !important;
     top: auto !important;
 }
