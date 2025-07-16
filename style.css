@@ -160,8 +160,8 @@ body {
 .device-icon.diffuser {
     width: 168px;
     height: 168px;
-    bottom: calc(65% + 195px) !important; /* +10px */
-    left: calc(26% + 70px) !important;  /* +60px */
+    bottom: calc(65% + 195px) !important;
+    left: calc(26% + 55px) !important;  /* -15px */
     right: auto !important;
     top: auto !important;
 }
@@ -178,8 +178,8 @@ body {
 .device-icon.speaker {
     width: 140px;
     height: 140px;
-    bottom: 15% !important; /* Adjusted based on image */
-    left: 30% !important;  /* Adjusted based on image */
+    bottom: calc(15% + 5px) !important; /* +5px */
+    left: 30% !important;
     right: auto !important;
     top: auto !important;
 }
