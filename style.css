@@ -297,9 +297,9 @@ body {
         7px 7px 20px 0px #0001,
         inset -4px -4px 10px 0px #fff9,
         inset 4px 4px 10px 0px #0001;
-    background-image: url('assets/images/relax-bg.png');
-    background-size: cover;
-    background-position: center;
+    /* background-image: url('assets/images/relax-bg.png'); */
+    /* background-size: cover; */
+    /* background-position: center; */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -363,10 +363,36 @@ body {
     background: transparent;
     box-sizing: border-box;
     transition: background 0.3s, border 0.3s;
+    position: relative;
 }
 .dot.middle {
     background: #222;
     border: 2px solid #222;
+    z-index: 2;
+}
+.dot.move-right {
+    animation: dotMoveRight 0.4s forwards;
+    z-index: 2;
+}
+.dot.move-left {
+    animation: dotMoveLeft 0.4s forwards;
+    z-index: 2;
+}
+.dot.become-middle {
+    animation: dotBecomeMiddle 0.4s forwards;
+    z-index: 1;
+}
+@keyframes dotMoveRight {
+    0% { transform: translateX(0); background: #222; }
+    100% { transform: translateX(20px); background: #222; }
+}
+@keyframes dotMoveLeft {
+    0% { transform: translateX(0); background: #222; }
+    100% { transform: translateX(-20px); background: #222; }
+}
+@keyframes dotBecomeMiddle {
+    0% { background: transparent; }
+    100% { background: #222; }
 }
 
 .dot.active {

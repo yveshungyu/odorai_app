@@ -212,19 +212,15 @@ class OdoraiApp {
         // dots 動畫
         const modeDots = document.querySelector('.mode-dots');
         if (modeDots) {
-            modeDots.classList.remove('slide-left', 'slide-right');
-            void modeDots.offsetWidth; // 強制 reflow
-            // --- 新增：動畫開始時，實心點移到旁邊 ---
             const dots = Array.from(modeDots.children);
-            if (dots.length === 3) {
-                dots.forEach(dot => dot.classList.remove('middle'));
-                if (direction === 'next') {
-                    dots[2].classList.add('middle'); // 右邊變實心
-                } else {
-                    dots[0].classList.add('middle'); // 左邊變實心
-                }
+            dots.forEach(dot => dot.classList.remove('middle', 'move-right', 'move-left', 'become-middle'));
+            if (direction === 'next') {
+                dots[1].classList.add('move-right'); // 中間往右
+                dots[2].classList.add('become-middle'); // 右邊變實心
+            } else {
+                dots[1].classList.add('move-left'); // 中間往左
+                dots[0].classList.add('become-middle'); // 左邊變實心
             }
-            modeDots.classList.add(direction === 'next' ? 'slide-right' : 'slide-left');
         }
         // 計算新 mode
         const modeKeys = Object.keys(this.modes);
@@ -692,17 +688,8 @@ class OdoraiApp {
         // Update mode dots
         const modeDots = document.querySelector('.mode-dots');
         if (modeDots) {
-            // 動態產生三顆點，讓中間的 always active
-            const modeKeys = Object.keys(this.modes);
-            const currentIndex = modeKeys.indexOf(this.currentMode);
-            let dotsHtml = '';
-            for (let i = -1; i <= 1; i++) {
-                let idx = (currentIndex + i + modeKeys.length) % modeKeys.length;
-                let dotClass = i === 0 ? 'dot middle' : 'dot';
-                dotsHtml += `<div class="${dotClass}"></div>`;
-            }
-            modeDots.innerHTML = dotsHtml;
-            modeDots.classList.remove('slide-left', 'slide-right');
+            // 永遠三顆固定
+            modeDots.innerHTML = '<div class="dot"></div><div class="dot middle"></div><div class="dot"></div>';
         }
         
         // Update stats
