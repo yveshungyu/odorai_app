@@ -206,20 +206,15 @@ class OdoraiApp {
         const wrapper = document.querySelector('.mode-circle-wrapper');
         const oldCircle = wrapper.querySelector('.mode-circle');
         if (!oldCircle) return;
-        // 決定動畫 class
-        const outClass = direction === 'next' ? 'slide-out-left' : 'slide-out-right';
-        const inClass = direction === 'next' ? 'slide-in-right' : 'slide-in-left';
         // dots 動畫
         const modeDots = document.querySelector('.mode-dots');
         if (modeDots) {
             const dots = Array.from(modeDots.children);
             dots.forEach(dot => dot.classList.remove('middle', 'move-right', 'move-left', 'become-middle'));
             if (direction === 'next') {
-                dots[1].classList.add('move-right'); // 中間往右
-                dots[2].classList.add('become-middle'); // 右邊變實心
+                dots[2].classList.add('middle'); // 右邊變實心
             } else {
-                dots[1].classList.add('move-left'); // 中間往左
-                dots[0].classList.add('become-middle'); // 左邊變實心
+                dots[0].classList.add('middle'); // 左邊變實心
             }
         }
         // 計算新 mode
@@ -234,7 +229,7 @@ class OdoraiApp {
         const newMode = modeKeys[newIndex];
         // 建立新圓形
         const newCircle = document.createElement('div');
-        newCircle.className = 'mode-circle ' + inClass;
+        newCircle.className = 'mode-circle ' + (direction === 'next' ? 'slide-in-right' : 'slide-in-left');
         // 設定新圓形純色
         const modeColors = {
             relax: '#FF6B95',
@@ -247,7 +242,7 @@ class OdoraiApp {
         wrapper.appendChild(newCircle);
         // 舊圓形加滑出動畫
         oldCircle.classList.remove('slide-in-left', 'slide-in-right', 'slide-out-left', 'slide-out-right');
-        oldCircle.classList.add(outClass);
+        oldCircle.classList.add(direction === 'next' ? 'slide-out-left' : 'slide-out-right');
         // 動畫結束後，切換 mode、移除舊圓形、移除新圓形動畫 class
         setTimeout(() => {
             this.currentMode = newMode;
