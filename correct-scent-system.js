@@ -178,11 +178,40 @@ class PhysicalScentSystem {
         this.data = null;
         this.isRunning = false;
         
-        // 設置按鍵監聽
-        this.setupKeyboardControls();
+        // 設置自動觸發系統
+        this.setupAutoTriggerSystem();
+        
+        // 設置按鍵監聽 - 已被自動系統取代
+        // this.setupKeyboardControls();
         
         console.log('🌬️ 獨立氣味波物理擴散系統已初始化');
-        console.log('🎮 控制方式: 按鍵 1(薰衣草) / 2(柑橘) / 3(尤加利)');
+        console.log('🔄 氣味系統現在將根據預設規則自動循環觸發');
+    }
+
+    /**
+     * 設置自動觸發系統
+     */
+    setupAutoTriggerSystem() {
+        this.autoTriggerConfig = {
+            1: { work: 90000, rest: 10000 }, // 1.5 分鐘工作, 10秒休息
+            2: { work: 60000, rest: 10000 }, // 1 分鐘工作, 10秒休息
+            3: { work: 50000, rest: 10000 }  // 50秒工作, 10秒休息
+        };
+    
+        this.autoTriggerState = {};
+        this.scentTriggerTimers = {};
+        this.scentTriggerInterval = 10000; // 每10秒觸發一次
+    
+        for (const deviceNumStr in this.autoTriggerConfig) {
+            const config = this.autoTriggerConfig[deviceNumStr];
+            // 系統啟動時, 立即進入工作狀態
+            this.autoTriggerState[deviceNumStr] = { isResting: false, countdown: config.work };
+            // 並且立即觸發第一次氣味
+            this.scentTriggerTimers[deviceNumStr] = { countdown: 0 };
+        }
+        
+        this.lastTimestamp = 0;
+        console.log('🤖 自動觸發系統已設定完成');
     }
     
     /**
@@ -193,7 +222,7 @@ class PhysicalScentSystem {
             const key = e.key;
             if (['1', '2', '3'].includes(key)) {
                 const deviceNum = parseInt(key);
-                this.activateScentDevice(deviceNum);
+                this.activateScentDevice(deviceNum, 'manual');
                 e.preventDefault();
             }
         });
@@ -204,7 +233,7 @@ class PhysicalScentSystem {
     /**
      * 激活氣味釋放器，創建新的獨立氣味波
      */
-    activateScentDevice(deviceNum) {
+    activateScentDevice(deviceNum, source = 'manual') {
         if (deviceNum in this.scentDevices) {
             const device = this.scentDevices[deviceNum];
             
@@ -219,8 +248,12 @@ class PhysicalScentSystem {
             
             this.scentWaves.push(newWave);
             device.active = true;
+
+            const sourceText = source === 'auto' 
+                ? `自動觸發 #${deviceNum}` 
+                : `手動按鍵 ${deviceNum}`;
             
-            console.log(`🌬️ 按鍵${deviceNum}: ${device.scentType} 新獨立氣味波釋放 - 位置: [${device.position[0]}, ${device.position[1]}] (總波數: ${this.scentWaves.length})`);
+            console.log(`🌬️ ${sourceText}: ${device.scentType} 新獨立氣味波釋放 (總波數: ${this.scentWaves.length})`);
             
             return true;
         }
@@ -286,6 +319,49 @@ class PhysicalScentSystem {
         
         // 重新建構顯示地圖（合併所有獨立氣味波）
         this._rebuildDisplayMaps();
+    }
+
+    /**
+     * 更新自動觸發器狀態
+     * @param {number} deltaTime - 距離上一幀的時間（毫秒）
+     */
+    _updateAutoTriggers(deltaTime) {
+        if (!deltaTime) return;
+    
+        for (const deviceNumStr in this.autoTriggerState) {
+            const deviceNum = parseInt(deviceNumStr);
+            const state = this.autoTriggerState[deviceNum];
+            const config = this.autoTriggerConfig[deviceNum];
+    
+            // 更新工作/休息倒計時
+            state.countdown -= deltaTime;
+    
+            // 檢查是否需要切換狀態 (工作 -> 休息 或 休息 -> 工作)
+            if (state.countdown <= 0) {
+                state.isResting = !state.isResting;
+                if (state.isResting) {
+                    state.countdown += config.rest; // 加上休息時間
+                    console.log(`🤖 裝置 ${deviceNum} 進入休息狀態 (10秒)`);
+                } else {
+                    state.countdown += config.work; // 加上工作時間
+                    console.log(`🤖 裝置 ${deviceNum} 進入工作狀態`);
+                    // 當工作開始時, 立即觸發一次氣味
+                    this.scentTriggerTimers[deviceNum].countdown = 0;
+                }
+            }
+    
+            // 如果處於工作狀態, 則處理10秒觸發邏輯
+            if (!state.isResting) {
+                const triggerTimer = this.scentTriggerTimers[deviceNum];
+                triggerTimer.countdown -= deltaTime;
+    
+                if (triggerTimer.countdown <= 0) {
+                    this.activateScentDevice(deviceNum, 'auto');
+                    // 重置10秒倒計時
+                    triggerTimer.countdown += this.scentTriggerInterval; 
+                }
+            }
+        }
     }
     
     /**
@@ -398,6 +474,12 @@ class PhysicalScentSystem {
      */
     update() {
         if (!this.isRunning) return;
+
+        const now = performance.now();
+        const deltaTime = this.lastTimestamp ? now - this.lastTimestamp : 0;
+        this.lastTimestamp = now;
+
+        this._updateAutoTriggers(deltaTime);
         
         this.updateScentPhysics();
         this.render();
@@ -412,7 +494,8 @@ class PhysicalScentSystem {
         if (this.isRunning) return;
         
         this.isRunning = true;
-        console.log('▶️ 獨立氣味波系統已啟動 - 30fps更新');
+        this.lastTimestamp = performance.now(); // 初始化時間戳
+        console.log('▶️ 獨立氣味波系統已啟動 - 自動觸發模式');
         this.update();
     }
     
