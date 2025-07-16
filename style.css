@@ -765,6 +765,18 @@ body {
     border-radius: 50%;
 }
 
+.device-status {
+    margin-top: 4px;
+    font-size: 15px;
+    font-weight: bold;
+    color: #e74c3c;
+    text-align: center;
+    letter-spacing: 1px;
+    min-height: 18px;
+    user-select: none;
+    pointer-events: none;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .mode-title {

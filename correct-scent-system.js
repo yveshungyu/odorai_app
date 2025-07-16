@@ -193,9 +193,9 @@ class PhysicalScentSystem {
      */
     setupAutoTriggerSystem() {
         this.autoTriggerConfig = {
-            1: { work: 30000, rest: 20000 }, // 30秒工作, 20秒休息
-            2: { work: 20000, rest: 15000 }, // 20秒工作, 15秒休息
-            3: { work: 20000, rest: 20000 }  // 20秒工作, 20秒休息
+            1: { work: 40000, rest: 15000 }, // 30秒工作, 20秒休息
+            2: { work: 30000, rest: 10000 }, // 20秒工作, 15秒休息
+            3: { work: 30000, rest: 10000 }  // 20秒工作, 20秒休息
         };
     
         this.autoTriggerState = {};
@@ -336,6 +336,9 @@ class PhysicalScentSystem {
             const deviceNum = parseInt(deviceNumStr);
             const state = this.autoTriggerState[deviceNum];
             const config = this.autoTriggerConfig[deviceNum];
+    
+            // 新增：如果該設備被停用，直接跳過
+            if (!this.scentDevices[deviceNum].active) continue;
     
             // 更新工作/休息倒計時
             state.countdown -= deltaTime;
@@ -537,6 +540,23 @@ class PhysicalScentSystem {
                 isExpanding: wave.isExpanding
             }))
         };
+    }
+
+    /**
+     * 外部控制單一設備啟用/停用
+     */
+    setDeviceActive(deviceType, active) {
+        // deviceType: 'diffuser', 'lamp', 'speaker'
+        const deviceMapping = {
+            'diffuser': 1,
+            'lamp': 3, // 注意 lamp/speaker 對應
+            'speaker': 2
+        };
+        const deviceNum = deviceMapping[deviceType];
+        if (deviceNum && this.scentDevices[deviceNum]) {
+            this.scentDevices[deviceNum].active = active;
+            console.log(`🔌 ${deviceType} (${deviceNum}) active: ${active}`);
+        }
     }
 }
 
