@@ -552,9 +552,8 @@ class OdoraiApp {
         const scentBlend = document.getElementById('scent-blend');
         
         if (homePage) {
-            // The class name is already being set, which is the correct way to handle this.
-            // The javascript logic below was redundant and conflicting with the CSS.
-            homePage.className = `page home-page active ${this.currentMode}-mode`;
+            // Only update the mode text, no longer change the background class.
+            homePage.className = 'page home-page active';
             console.log(`設置模式: ${this.currentMode}-mode`);
         }
         
@@ -576,6 +575,19 @@ class OdoraiApp {
         
         // Update device positions
         this.updateDevicePositions();
+        this.updateTriggerTime();
+    }
+
+    updateTriggerTime() {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const timeString = `${hours}:${minutes}`;
+
+        const triggerTime = document.getElementById('trigger-time');
+        if (triggerTime) {
+            triggerTime.textContent = `${timeString} Trigger`;
+        }
     }
     
     updateStatsDisplay() {
@@ -621,16 +633,7 @@ class OdoraiApp {
     }
     
     triggerModeAnimation() {
-        // Animate mode transition
-        const modeTitle = document.getElementById('home-mode-title');
-        if (modeTitle) {
-            modeTitle.style.transform = 'scale(1.2)';
-            modeTitle.style.opacity = '0.7';
-            setTimeout(() => {
-                modeTitle.style.transform = 'scale(1)';
-                modeTitle.style.opacity = '1';
-            }, 300);
-        }
+        // Mode title animation is removed to prevent z-index issues.
         
         // Animate mode circle
         const modeCircle = document.querySelector('.mode-circle');
