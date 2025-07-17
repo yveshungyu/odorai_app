@@ -136,8 +136,8 @@ class OdoraiApp {
             this.showAddDeviceDialog();
         });
         
-        // Touch gestures for mobile
-        this.setupTouchGestures();
+        // Touch gestures for mobile - 移除頁面間滑動，只保留頁面內滑動
+        // this.setupTouchGestures();
         
         // Add resize listener to keep scent points in sync
         window.addEventListener('resize', () => this.syncScentDevicePositions());
