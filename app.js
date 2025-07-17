@@ -811,6 +811,9 @@ class OdoraiApp {
             const modeKeys = Object.keys(this.modes);
             const currentIndex = modeKeys.indexOf(this.currentMode);
             
+            // 清除滑動動畫class，避免位置偏移
+            modeDots.classList.remove('slide-left', 'slide-right');
+            
             // 重新建立三個點，並根據當前模式設置active狀態
             modeDots.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
             const dots = Array.from(modeDots.children);
