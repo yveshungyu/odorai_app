@@ -1320,7 +1320,7 @@ class OdoraiApp {
         `).join('');
         
         // Update AI summary
-        document.getElementById('modal-ai-summary').textContent = modeData.aiSummary;
+        document.getElementById('modal-ai-summary').innerHTML = `<p style="margin: 0;">${modeData.aiSummary}</p>`;
         
         // Update benefits
         const benefits = document.getElementById('modal-benefits');
@@ -1348,12 +1348,6 @@ class OdoraiApp {
                         ingredient: "NEW: Bergamot",
                         change: "",
                         reason: "Balanced scent with gentle euphoric feeling"
-                    },
-                    {
-                        type: "~",
-                        ingredient: "Frankincense",
-                        change: "",
-                        reason: "Enhanced meditation focus & mental relaxation"
                     }
                 ],
                 coreScents: [
@@ -1381,12 +1375,6 @@ class OdoraiApp {
                         ingredient: "NEW: Lemon",
                         change: "",
                         reason: "Mental clarity and alertness enhancement"
-                    },
-                    {
-                        type: "~",
-                        ingredient: "Peppermint",
-                        change: "",
-                        reason: "Optimized for sustained concentration"
                     }
                 ],
                 coreScents: [
@@ -1414,12 +1402,6 @@ class OdoraiApp {
                         ingredient: "NEW: Ginger",
                         change: "",
                         reason: "Natural energy boost without caffeine crash"
-                    },
-                    {
-                        type: "~",
-                        ingredient: "Lemongrass",
-                        change: "",
-                        reason: "Balanced stimulation for sustained energy"
                     }
                 ],
                 coreScents: [
