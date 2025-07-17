@@ -125,6 +125,9 @@ class OdoraiApp {
             this.cycleModes();
         });
         
+        // Mode info modal
+        this.setupModeInfoModal();
+        
         // Mode-page swipe for mode switching only
         this.setupModePageSwipe();
         
@@ -252,17 +255,6 @@ class OdoraiApp {
         const wrapper = document.querySelector('.mode-circle-wrapper');
         const oldCircle = wrapper.querySelector('.mode-circle');
         if (!oldCircle) return;
-        // dots 動畫
-        const modeDots = document.querySelector('.mode-dots');
-        if (modeDots) {
-            const dots = Array.from(modeDots.children);
-            dots.forEach(dot => dot.classList.remove('middle', 'move-right', 'move-left', 'become-middle'));
-            if (direction === 'next') {
-                dots[2].classList.add('middle'); // 右邊變實心
-            } else {
-                dots[0].classList.add('middle'); // 左邊變實心
-            }
-        }
         // 計算新 mode
         const modeKeys = Object.keys(this.modes);
         const currentIndex = modeKeys.indexOf(this.currentMode);
@@ -273,6 +265,18 @@ class OdoraiApp {
             newIndex = (currentIndex - 1 + modeKeys.length) % modeKeys.length;
         }
         const newMode = modeKeys[newIndex];
+        
+        // dots 動畫
+        const modeDots = document.querySelector('.mode-dots');
+        if (modeDots) {
+            const dots = Array.from(modeDots.children);
+            dots.forEach(dot => dot.classList.remove('middle'));
+            dots[newIndex].classList.add('middle'); // 根據新模式設置正確的點
+            
+            // 導航點滑動動畫
+            modeDots.classList.remove('slide-left', 'slide-right');
+            modeDots.classList.add(direction === 'next' ? 'slide-left' : 'slide-right');
+        }
         // 建立新圓形
         const newCircle = document.createElement('div');
         newCircle.className = 'mode-circle ' + (direction === 'next' ? 'slide-in-right' : 'slide-in-left');
@@ -804,8 +808,15 @@ class OdoraiApp {
         // Update mode dots
         const modeDots = document.querySelector('.mode-dots');
         if (modeDots) {
-            // 永遠三顆固定
-            modeDots.innerHTML = '<div class="dot"></div><div class="dot middle"></div><div class="dot"></div>';
+            const modeKeys = Object.keys(this.modes);
+            const currentIndex = modeKeys.indexOf(this.currentMode);
+            
+            // 重新建立三個點，並根據當前模式設置active狀態
+            modeDots.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
+            const dots = Array.from(modeDots.children);
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('middle', index === currentIndex);
+            });
         }
         
         // Update stats
@@ -1231,6 +1242,197 @@ class OdoraiApp {
                 dialog.remove();
             }
         }, 5000);
+    }
+
+    setupModeInfoModal() {
+        // Mode page info icon click
+        const modePageInfoIcon = document.querySelector('.mode-page .info-icon');
+        if (modePageInfoIcon) {
+            modePageInfoIcon.addEventListener('click', () => {
+                this.showModeInfo();
+            });
+        }
+
+        // Modal close events
+        const modal = document.getElementById('mode-info-modal');
+        const closeBtn = modal.querySelector('.modal-close');
+        const backdrop = modal.querySelector('.modal-backdrop');
+
+        closeBtn.addEventListener('click', () => this.closeModeInfo());
+        backdrop.addEventListener('click', () => this.closeModeInfo());
+        
+        // Escape key to close
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modal.classList.contains('show')) {
+                this.closeModeInfo();
+            }
+        });
+    }
+
+    showModeInfo() {
+        const modal = document.getElementById('mode-info-modal');
+        this.updateModeInfoContent();
+        modal.classList.add('show');
+        
+        // Prevent body scroll when modal is open
+        document.body.style.overflow = 'hidden';
+    }
+
+    closeModeInfo() {
+        const modal = document.getElementById('mode-info-modal');
+        modal.classList.remove('show');
+        
+        // Restore body scroll
+        document.body.style.overflow = '';
+    }
+
+    updateModeInfoContent() {
+        const modeData = this.getModeData(this.currentMode);
+        
+        // Update title
+        document.getElementById('modal-formula-name').textContent = modeData.title;
+        
+        // Update adjustments
+        const adjustmentsList = document.getElementById('modal-adjustments');
+        adjustmentsList.innerHTML = modeData.adjustments.map(adj => `
+            <div class="adjustment-item">
+                <span class="adjustment-type">${adj.type}</span>
+                <div class="adjustment-content">
+                    <div>
+                        <span class="ingredient-name">${adj.ingredient}</span>
+                        <span class="percentage-change">${adj.change}</span>
+                    </div>
+                    <div class="adjustment-reason">${adj.reason}</div>
+                </div>
+            </div>
+        `).join('');
+        
+        // Update core scents
+        const coreScents = document.getElementById('modal-core-scents');
+        coreScents.innerHTML = modeData.coreScents.map(scent => `
+            <div class="scent-item">
+                <span class="scent-name">${scent.name}</span>
+                <span class="scent-effect">${scent.effect}</span>
+            </div>
+        `).join('');
+        
+        // Update AI summary
+        document.getElementById('modal-ai-summary').textContent = modeData.aiSummary;
+        
+        // Update benefits
+        const benefits = document.getElementById('modal-benefits');
+        benefits.innerHTML = modeData.benefits.map(benefit => `
+            <div class="benefit-item">
+                <div class="benefit-label">${benefit.label}</div>
+                <div class="benefit-value">${benefit.value}</div>
+            </div>
+        `).join('');
+    }
+
+    getModeData(mode) {
+        const modeDataMap = {
+            relax: {
+                title: "Yves's RELAX Formula",
+                adjustments: [
+                    {
+                        type: "+",
+                        ingredient: "Lavender",
+                        change: "(15% ▲)",
+                        reason: "To enhance your deep sleep quality"
+                    },
+                    {
+                        type: "+",
+                        ingredient: "NEW: Bergamot",
+                        change: "",
+                        reason: "Balanced scent with gentle euphoric feeling"
+                    },
+                    {
+                        type: "~",
+                        ingredient: "Frankincense",
+                        change: "",
+                        reason: "Enhanced meditation focus & mental relaxation"
+                    }
+                ],
+                coreScents: [
+                    { name: "Lavender", effect: "Deep calming & soothing" },
+                    { name: "Bergamot", effect: "Anxiety relief & emotional balance" },
+                    { name: "Frankincense", effect: "Meditation guidance & spiritual relaxation" }
+                ],
+                aiSummary: "Based on your sleep data last month (average sleep onset ▲5%) and heart rate feedback, AI increased 'Lavender' ratio to strengthen sleep-aid effects and introduced 'Bergamot' to gently balance your emotions.",
+                benefits: [
+                    { label: "Expected Sleep Improvement", value: "+8.5%" },
+                    { label: "Expected Stress Reduction", value: "-12.3%" }
+                ]
+            },
+            focus: {
+                title: "Yves's FOCUS Formula",
+                adjustments: [
+                    {
+                        type: "+",
+                        ingredient: "Rosemary",
+                        change: "(20% ▲)",
+                        reason: "To boost your cognitive performance"
+                    },
+                    {
+                        type: "+",
+                        ingredient: "NEW: Lemon",
+                        change: "",
+                        reason: "Mental clarity and alertness enhancement"
+                    },
+                    {
+                        type: "~",
+                        ingredient: "Peppermint",
+                        change: "",
+                        reason: "Optimized for sustained concentration"
+                    }
+                ],
+                coreScents: [
+                    { name: "Rosemary", effect: "Memory enhancement & mental clarity" },
+                    { name: "Lemon", effect: "Alertness boost & mood elevation" },
+                    { name: "Peppermint", effect: "Sustained focus & mental energy" }
+                ],
+                aiSummary: "Your productivity tracking showed 12% decreased focus time last month. AI enhanced 'Rosemary' concentration and added 'Lemon' for mental sharpness. Your workflow patterns suggest peak performance between 9-11 AM.",
+                benefits: [
+                    { label: "Expected Focus Improvement", value: "+11.2%" },
+                    { label: "Expected Productivity Boost", value: "+9.7%" }
+                ]
+            },
+            energize: {
+                title: "Yves's ENERGIZE Formula", 
+                adjustments: [
+                    {
+                        type: "+",
+                        ingredient: "Grapefruit",
+                        change: "(18% ▲)",
+                        reason: "To increase your morning vitality"
+                    },
+                    {
+                        type: "+",
+                        ingredient: "NEW: Ginger",
+                        change: "",
+                        reason: "Natural energy boost without caffeine crash"
+                    },
+                    {
+                        type: "~",
+                        ingredient: "Lemongrass",
+                        change: "",
+                        reason: "Balanced stimulation for sustained energy"
+                    }
+                ],
+                coreScents: [
+                    { name: "Grapefruit", effect: "Natural stimulation & mood lift" },
+                    { name: "Ginger", effect: "Energy boost & mental invigoration" },
+                    { name: "Lemongrass", effect: "Sustained vitality & freshness" }
+                ],
+                aiSummary: "Your energy levels showed a 15% dip in afternoons last month. AI boosted 'Grapefruit' for natural stimulation and introduced 'Ginger' for sustained energy without the typical 3 PM crash you experienced.",
+                benefits: [
+                    { label: "Expected Energy Increase", value: "+13.8%" },
+                    { label: "Expected Mood Enhancement", value: "+10.4%" }
+                ]
+            }
+        };
+        
+        return modeDataMap[mode] || modeDataMap.relax;
     }
 }
 

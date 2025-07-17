@@ -955,3 +955,237 @@ body {
         margin-top: 24px;
     }
 }
+
+/* Mode Info Modal Styles */
+.mode-info-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.mode-info-modal.show {
+    display: flex;
+    opacity: 1;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    position: relative;
+    background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    max-width: 90vw;
+    max-height: 85vh;
+    width: 420px;
+    overflow: hidden;
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+}
+
+.mode-info-modal.show .modal-content {
+    transform: translateY(0);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: flex-end;
+    padding: 20px 20px 0;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 28px;
+    color: #999;
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.modal-close:hover {
+    background: #f0f0f0;
+    color: #333;
+    transform: scale(1.1);
+}
+
+.modal-body {
+    padding: 0 25px 25px;
+    overflow-y: auto;
+    max-height: calc(85vh - 60px);
+}
+
+.formula-title {
+    text-align: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.formula-title h3 {
+    margin: 0 0 5px 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.update-date {
+    font-size: 14px;
+    color: #6c757d;
+    font-style: italic;
+}
+
+.formula-section {
+    margin-bottom: 20px;
+}
+
+.formula-section h4 {
+    margin: 0 0 12px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #495057;
+    border-left: 4px solid #007bff;
+    padding-left: 12px;
+}
+
+.adjustments-list {
+    space-y: 8px;
+}
+
+.adjustment-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    border-left: 4px solid #28a745;
+}
+
+.adjustment-type {
+    font-weight: 600;
+    color: #28a745;
+    margin-right: 8px;
+    min-width: 20px;
+}
+
+.adjustment-content {
+    flex: 1;
+}
+
+.ingredient-name {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.percentage-change {
+    color: #28a745;
+    font-weight: 500;
+    margin-left: 8px;
+}
+
+.adjustment-reason {
+    font-size: 13px;
+    color: #6c757d;
+    margin-top: 2px;
+}
+
+.core-scents {
+    space-y: 8px;
+}
+
+.scent-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background: linear-gradient(90deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 10px;
+    margin-bottom: 8px;
+}
+
+.scent-name {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.scent-effect {
+    font-size: 13px;
+    color: #6c757d;
+    text-align: right;
+}
+
+.ai-summary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 15px;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.expected-benefits {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.benefit-item {
+    background: #e8f5e8;
+    padding: 12px;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid #c8e6c9;
+}
+
+.benefit-label {
+    font-size: 12px;
+    color: #2e7d32;
+    font-weight: 500;
+}
+
+.benefit-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1b5e20;
+    margin-top: 4px;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+    .modal-content {
+        width: 95vw;
+        margin: 20px;
+    }
+    
+    .modal-body {
+        padding: 0 20px 20px;
+    }
+    
+    .expected-benefits {
+        grid-template-columns: 1fr;
+    }
+}
