@@ -83,17 +83,17 @@ class OdoraiApp {
     }
     
     init() {
-        console.log('Initializing ÔDÔRAI app components...');
-        // this.updateTime(); // REMOVED: This function caused a crash
+        console.log('Initializing ÔDÔRAI app...');
+        
         this.setupEventListeners();
         this.updateUI();
-        this.startAutoTrigger();
+        this.initScentSystem();
         
-        // 延遲氣味系統初始化直到位置恢復完成
-        this.delayedInitScentSystem();
+        // 初始化時間顯示
+        this.updateTriggerTime();
         
-        // REMOVED: The related function was deleted
-        // setInterval(() => this.updateTime(), 1000); 
+        // 每3分鐘更新一次時間 (180000 ms)
+        setInterval(() => this.updateTriggerTime(), 180000);
         
         // Simulate data updates every 30 seconds
         setInterval(() => this.updateStats(), 30000);

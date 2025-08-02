@@ -1,4 +1,19 @@
-/* Reset and Base Styles */
+/* ===== 自定義字體定義 ===== */
+@font-face {
+    font-family: 'Utah Condensed Bold';
+    src: url('./Utah Condensed Bold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'NCTTorin Regular';
+    src: url('./NCTTorin-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* ===== 重置和基本設置 ===== */
 * {
     margin: 0;
     padding: 0;
@@ -6,1193 +21,532 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    height: 100vh;
-    overflow: hidden;
+    font-family: 'NCTTorin Regular', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background: #000;
-    margin: 0;
-    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    color: white;
 }
 
-/* Scent Visualization Canvas - Re-adding this deleted section */
-#scent-canvas {
-    position: absolute; /* Changed from fixed to absolute */
-    top: 0;
-    left: 0;
-    width: 100%; /* Changed from vw to % */
-    height: 100%; /* Changed from vh to % */
-    z-index: 1; /* This is now relative to its parent, .home-page */
-    pointer-events: none;
-    opacity: 0.7;
-}
-
-/* Main Container */
-.app-container {
-    height: 100vh;
-    padding-bottom: 80px;
+/* ===== 固定比例容器 ===== */
+.fixed-ratio-container {
+    width: 1237px;
+    height: 1650px;
     position: relative;
+    background: #222;
+    border-radius: 24px;
+    overflow: hidden;
+    transform: scale(min(calc(100vw / 1237), calc(100vh / 1650)));
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
 }
 
+/* ===== 主應用容器 ===== */
+.app-container {
+    width: 100%;
+    height: calc(100% - 141px); /* 減去底部導航高度 */
+    position: relative;
+    background: #111;
+}
+
+/* ===== 頁面基本結構 ===== */
 .page {
     position: absolute;
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
+    width: 100%;
+    height: 100%;
     display: none;
-    flex-direction: column;
     opacity: 0;
     transition: opacity 0.3s ease;
-    z-index: 1;
 }
 
 .page.active {
     display: flex !important;
     opacity: 1 !important;
-    visibility: visible !important;
 }
 
-/* Home Page Styles */
-.home-page {
-    background-image: url('assets/images/relax-bg.png'); /* Set this as the permanent background */
-    position: relative;
-    overflow: hidden;
-    min-height: 100%;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-}
-
-/* These rules are no longer needed as the background is now static */
-/*
-.home-page.relax-mode {
-    background-image: url('assets/images/relax-bg.png');
-}
-
-.home-page.focus-mode {
-    background-image: url('assets/images/focus-bg.jpg');
-}
-
-.home-page.energize-mode {
-    background-image: url('assets/images/energize-bg.jpg');
-}
-*/
-
-/* All interactive elements should be above the scent canvas. z-index: 2 or higher */
-.ambient-overlay {
-    position: absolute;
-    top: 20px; /* Adjusting position from 60px */
-    left: 20px;
-    right: 20px;
-    z-index: 2; /* Ensure it's above the scent canvas */
-}
-
-.ambient-text {
-    font-size: 14px;
-    line-height: 1.4;
-    color: white;
-    opacity: 0.9;
-    font-weight: 400;
-}
-
-.highlight {
-    font-weight: 600;
-}
-
-.mode-display {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    color: white;
-    margin-top: 0;
-    padding: 40px 20px;
-    z-index: 2; /* Ensure it's above the scent canvas */
-    position: relative; /* This ensures the z-index is respected during child animations */
-}
-
-.mode-title {
-    font-size: 64px;
-    font-weight: 800;
-    letter-spacing: 4px;
-    margin-bottom: 8px;
-    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
-}
-
-.trigger-time {
-    font-size: 16px;
-    font-weight: 500;
-    opacity: 0.9;
-    letter-spacing: 1px;
-}
-
-.device-grid {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 10;
-    visibility: visible;
-    pointer-events: none; /* Allow clicks to pass through to background */
-}
-
-.device-icon {
-    position: absolute;
-    background: transparent; /* 改為透明背景 */
-    border-radius: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: none; /* 移除所有過渡效果 */
-    backdrop-filter: none; /* 移除模糊效果 */
-    border: none; /* 移除邊框 */
-    pointer-events: auto;
-    transform: translate(-50%, 50%); /* 使用 bottom/left 時的正確中心定位 */
-    z-index: 11; /* Ensure it's above the scent canvas grid */
-}
-
-/* 移除 active 和 hover 效果 */
-.device-icon.active,
-.device-icon:hover {
-    background: transparent;
-    box-shadow: none;
-}
-
-/* 設置不同設備的尺寸 */
-.device-icon.diffuser {
-    width: 168px;
-    height: 168px;
-    bottom: calc(65% + 195px) !important;
-    left: calc(26% + 55px) !important;  /* -15px */
-    right: auto !important;
-    top: auto !important;
-}
-
-.device-icon.lamp {
-    /* Took styles from Speaker */
-    width: 140px;
-    height: 140px;
-    bottom: calc(15% + 5px) !important;
-    left: 30% !important;
-    right: auto !important;
-    top: auto !important;
-}
-
-.device-icon.speaker {
-    /* Took styles from Lamp */
-    width: 140px; /* Match Lamp's size */
-    height: 140px; /* Match Lamp's size */
-    bottom: calc(50% - 15px) !important;
-    left: calc(76% - 30px) !important;
-    right: auto !important;
-    top: auto !important;
-}
-
-/* 新增圖片樣式 */
-.device-img {
+.page-content {
     width: 100%;
     height: 100%;
-    object-fit: contain; /* 確保圖片完整顯示 */
-}
-
-/* 移除舊的 device-inner 樣式 */
-.device-inner {
-    display: none;
-}
-
-/* 移除舊的 CSS 繪製圖標 */
-.diffuser-icon,
-.lamp-icon,
-.speaker-icon,
-.thermostat-icon {
-    display: none;
-}
-
-.add-device-btn {
-    position: absolute;
-    bottom: 80px;
-    right: 30px;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.25);
-    border: none;
-    color: white;
-    font-size: 32px;
-    font-weight: 300;
-    cursor: pointer;
-    backdrop-filter: blur(10px);
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 11; /* Ensure it's above the scent canvas grid */
-}
-
-.add-device-btn:hover {
-    background: rgba(255, 255, 255, 0.35);
-    transform: scale(1.1);
-}
-
-/* Mode Page Styles */
-.mode-page {
-    background: #f8f8f8;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
-    min-height: 100vh;
-    padding: 0 20px 0 20px;
-    position: relative;
-}
-
-.info-icon {
-    position: absolute;
-    top: 48px;
-    right: 40px;
-    width: 32px;
-    height: 32px;
-    border: 2px solid #ccc;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
     justify-content: center;
-    font-size: 18px;
-    font-weight: bold;
-    color: #ccc;
-    cursor: pointer;
-    background: #fff;
-    z-index: 10;
-}
-
-.mode-page .mode-circle-wrapper {
-    margin-top: 48px;
-}
-
-.mode-circle-wrapper {
-    width: 332px;
-    height: 332px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    overflow: hidden;
-    margin: 0 auto;
-}
-
-.mode-circle {
-    width: 332px;
-    height: 332px;
-    border-radius: 50%;
-    background-color: #e0e5ec;
-    position: absolute;
-    left: 0;
-    top: 0;
-    box-shadow: 
-        -7px -7px 20px 0px #fff9,
-        7px 7px 20px 0px #0001,
-        inset -4px -4px 10px 0px #fff9,
-        inset 4px 4px 10px 0px #0001;
-    /* background-image: url('assets/images/relax-bg.png'); */
-    /* background-size: cover; */
-    /* background-position: center; */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.4s cubic-bezier(0.4,0,0.2,1);
-}
-
-.slide-in-left {
-    animation: slideInLeft 0.4s forwards;
-}
-.slide-in-right {
-    animation: slideInRight 0.4s forwards;
-}
-.slide-out-left {
-    animation: slideOutLeft 0.4s forwards;
-}
-.slide-out-right {
-    animation: slideOutRight 0.4s forwards;
-}
-@keyframes slideOutRight {
-    from { transform: translateX(0); opacity: 1; }
-    to   { transform: translateX(100%); opacity: 0; }
-}
-
-@keyframes slideInLeft {
-    from { transform: translateX(-100%); opacity: 0; }
-    to   { transform: translateX(0); opacity: 1; }
-}
-@keyframes slideInRight {
-    from { transform: translateX(100%); opacity: 0; }
-    to   { transform: translateX(0); opacity: 1; }
-}
-@keyframes slideOutLeft {
-    from { transform: translateX(0); opacity: 1; }
-    to   { transform: translateX(-100%); opacity: 0; }
-}
-
-.scent-visual {
-    display: none; /* Hide the SVG particles as per the new design */
-}
-
-.mode-dots {
-    position: static;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 12px;
-    margin-top: 12px;
-    margin-bottom: 16px;
-    min-width: 60px;
-    transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
-}
-.mode-dots.slide-left {
-    transform: translateX(-32px);
-}
-.mode-dots.slide-right {
-    transform: translateX(32px);
-}
-
-.dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    border: 2px solid #222;
-    background: transparent;
-    box-sizing: border-box;
-    transition: background 0.3s, border 0.3s;
-    position: relative;
-}
-.dot.middle {
-    background: #222;
-    border: 2px solid #222;
-    z-index: 2;
-}
-.dot.move-right {
-    animation: dotMoveRight 0.4s forwards;
-    z-index: 2;
-}
-.dot.move-left {
-    animation: dotMoveLeft 0.4s forwards;
-    z-index: 2;
-}
-.dot.become-middle {
-    animation: dotBecomeMiddle 0.4s forwards;
-    z-index: 1;
-}
-@keyframes dotMoveRight {
-    0% { transform: translateX(0); background: #222; }
-    100% { transform: translateX(20px); background: #222; }
-}
-@keyframes dotMoveLeft {
-    0% { transform: translateX(0); background: #222; }
-    100% { transform: translateX(-20px); background: #222; }
-}
-@keyframes dotBecomeMiddle {
-    0% { background: transparent; }
-    100% { background: #222; }
-}
-
-.dot.active {
-    background: black;
-    border-color: black;
-}
-
-.mode-info {
+    padding: 40px;
     text-align: center;
-    margin-top: 20px; /* Reduced margin */
-    margin-bottom: 50px;
 }
 
-.current-mode-label {
-    font-size: 16px;
-    color: #888;
-    margin-bottom: 12px;
-    font-weight: 500;
+.page-content h1 {
+    font-size: 48px;
+    margin-bottom: 20px;
+    color: white;
 }
 
-.mode-name {
-    font-size: 48px; /* Larger font size */
-    font-weight: 800;
-    color: #333;
-    margin-bottom: 12px;
-    letter-spacing: 2px;
-}
-
-.scent-blend {
-    font-size: 18px; /* Larger font size */
-    color: #666;
-    font-weight: 500;
-}
-
-.stats-container {
-    width: 100%;
-    max-width: 480px; /* Wider for iPad */
-    margin: 0 auto;
-}
-
-.stat-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 25px 20px; /* Increased padding */
-    border-radius: 20px;
-    background-color: #fff;
-    margin-bottom: 16px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-}
-
-.stat-row:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
-}
-
-.stat-label {
-    font-size: 18px; /* Larger font size */
-    color: #333;
-    font-weight: 500;
-}
-
-.stat-value {
-    display: flex;
-    align-items: center;
-    gap: 16px; /* Increased gap */
-    font-size: 20px; /* Larger font size */
-    color: #333;
-    font-weight: 600;
-}
-
-.change-indicator {
-    font-size: 16px;
-    font-weight: 500;
-    color: #E74C3C;
-}
-
-.change-indicator.positive {
-    color: #27AE60;
-}
-
-.time-value {
-    font-size: 20px; /* Larger font size */
-    color: #333;
-}
-
-/* Spatial Page Styles */
-.spatial-page {
-    background: linear-gradient(180deg, #E8E8E8 0%, #D0D0D0 100%);
-    flex-direction: column;
-    padding: 40px 5px 80px;
-    overflow: hidden;
-}
-
-.spatial-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    width: 100%;
+.page-content p {
+    font-size: 24px;
+    color: #aaa;
     margin-bottom: 40px;
-    padding: 0 10px;
 }
 
-.spatial-greeting h2 {
-    font-size: 28px;
-    font-weight: 600;
-    color: #333;
-    margin: 0 0 8px 0;
-}
-
-.spatial-greeting p {
-    font-size: 16px;
-    color: #666;
-    margin: 0;
-}
-
-.spatial-header .info-icon {
-    width: 36px;
-    height: 36px;
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #666;
-    font-size: 18px;
-    font-weight: bold;
-}
-
-.room-scene {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 12px;
-    padding: 5px;
-}
-
-.room-background {
-    position: relative;
-    width: 90vw;
-    height: 83.94vw; /* 維持2332:2175比例 (90vw * 2175/2332 = 90vw * 0.9327) */
-    background: url('./assets/images/LivingRoom-bg.png') center/contain no-repeat;
-    background-size: contain;
-    transition: all 0.5s ease, opacity 0.2s ease;
-}
-
-/* 背景切換功能 - 根據不同模式使用不同背景 */
-.room-background.mode-relax {
-    background-image: url('./assets/images/LivingRoom-bg.png');
-}
-
-.room-background.mode-focus {
-    background-image: url('./assets/images/LivingRoom-bg.png'); /* 可以換成focus-bg.png */
-    filter: hue-rotate(180deg) saturate(1.2) brightness(1.05);
-}
-
-.room-background.mode-energize {
-    background-image: url('./assets/images/LivingRoom-bg.png'); /* 可以換成energize-bg.png */
-    filter: hue-rotate(60deg) saturate(1.3) brightness(1.1);
-}
-
-/* Device Overlays */
-.device-overlays {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-}
-
-.room-device {
-    position: absolute;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    z-index: 10;
-}
-
-.room-device .device-icon {
-    width: 3vw;
-    height: 3vw;
-    min-width: 40px;
-    min-height: 40px;
-    max-width: 60px;
-    max-height: 60px;
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(1vw + 12px);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-    border: 2px solid rgba(255, 255, 255, 0.8);
-    transition: all 0.3s ease;
-}
-
-.room-device:hover .device-icon {
-    transform: scale(1.1);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-}
-
-.room-device .device-status {
-    position: absolute;
-    top: -3px;
-    right: -3px;
-    width: 0.8vw;
-    height: 0.8vw;
-    min-width: 12px;
-    min-height: 12px;
-    max-width: 16px;
-    max-height: 16px;
-    border-radius: 50%;
-    background: #ddd;
-    border: 2px solid white;
-    transition: all 0.3s ease;
-}
-
-.room-device .device-status.active {
-    background: #FF1493;
-    box-shadow: 0 0 8px rgba(255, 20, 147, 0.6);
-}
-
-.robot-device .device-icon {
-    background: linear-gradient(135deg, #4A4A4A 0%, #2A2A2A 100%);
-    color: white;
-}
-
-.lamp-device .device-icon {
-    background: linear-gradient(135deg, #FFB6C1 0%, #FF69B4 100%);
-    color: white;
-}
-
-.speaker-device .device-icon {
-    background: linear-gradient(135deg, #87CEEB 0%, #4682B4 100%);
-    color: white;
-}
-
-/* Add Device Points */
-.add-device-points {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-}
-
-.add-point {
-    position: absolute;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    z-index: 10;
-}
-
-.add-point .add-icon {
-    width: 2.5vw;
-    height: 2.5vw;
-    min-width: 32px;
-    min-height: 32px;
-    max-width: 48px;
-    max-height: 48px;
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(0.8vw + 12px);
-    font-weight: bold;
-    color: #666;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-    border: 2px solid rgba(255, 255, 255, 0.8);
-    transition: all 0.3s ease;
-}
-
-.add-point:hover .add-icon {
-    background: rgba(255, 255, 255, 1);
-    transform: scale(1.1);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
-    color: #333;
-}
-
-/* Scent Visualization */
-.scent-visualizations {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    pointer-events: none;
-}
-
-.scent-area {
-    position: absolute;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(255, 20, 147, 0.2) 0%, rgba(255, 20, 147, 0.1) 50%, transparent 70%);
-    animation: scentPulse 3s infinite ease-in-out;
-    opacity: 0.8;
-}
-
-@keyframes scentPulse {
-    0%, 100% { 
-        transform: scale(1); 
-        opacity: 0.6; 
-    }
-    50% { 
-        transform: scale(1.2); 
-        opacity: 0.3; 
-    }
-}
-
-
-
-
-
-@keyframes scentBurst {
-    0% { transform: translate(-50%, -50%) scale(0); opacity: 0.8; }
-    50% { transform: translate(-50%, -50%) scale(1.5); opacity: 0.4; }
-    100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
-}
-
-/* Room Dots Navigation */
-.room-dots {
-    position: static;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 12px;
-    margin-top: 8px;
-    margin-bottom: 24px;
-    min-width: 60px;
-    transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
-}
-
-.room-dots.slide-left {
-    transform: translateX(-32px);
-}
-
-.room-dots.slide-right {
-    transform: translateX(32px);
-}
-
-/* Room Label */
-.room-label {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    background: rgba(255, 153, 0, 0.9);
-    color: white;
-    padding: 12px 24px;
-    border-radius: 25px;
-    font-weight: 600;
-    font-size: 16px;
-    box-shadow: 0 4px 16px rgba(255, 153, 0, 0.3);
-    margin-top: auto;
-}
-
-.room-icon {
-    font-size: 18px;
-}
-
-.bookshelf {
-    position: absolute;
-    width: 25px;
-    height: 60px;
-    background: linear-gradient(135deg, #8B7355 0%, #6B5B44 100%);
-    border-radius: 4px;
-    bottom: 40px;
-    right: 30px;
-    transform: translateZ(15px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-}
-
-.chair {
-    position: absolute;
-    width: 25px;
-    height: 25px;
-    background: linear-gradient(135deg, #A0845C 0%, #8B7355 100%);
-    border-radius: 6px;
-    bottom: 140px;
-    left: 40px;
-    transform: translateZ(6px);
-    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
-}
-
-.diffuser-device {
-    position: absolute;
-    width: 12px;
-    height: 12px;
-    background: radial-gradient(circle, #ffffff 0%, #e0e0e0 100%);
-    border-radius: 50%;
-    bottom: 100px;
-    right: 100px;
-    transform: translateZ(20px);
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
-    animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.6); }
-    50% { box-shadow: 0 0 30px rgba(255, 255, 255, 1); }
-}
-
-.scent-zones {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    top: 0;
-}
-
-.scent-zone {
-    position: absolute;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
-    animation: expand 4s ease-in-out infinite;
-}
-
-.zone-1 {
-    width: 60px;
-    height: 60px;
-    bottom: 70px;
-    right: 70px;
-    animation-delay: 0s;
-}
-
-.zone-2 {
-    width: 80px;
-    height: 80px;
-    bottom: 60px;
-    right: 60px;
-    animation-delay: 1s;
-}
-
-.zone-3 {
-    width: 100px;
-    height: 100px;
-    bottom: 50px;
-    right: 50px;
-    animation-delay: 2s;
-}
-
-@keyframes expand {
-    0%, 100% { transform: scale(0.8); opacity: 0.1; }
-    50% { transform: scale(1.2); opacity: 0.3; }
-}
-
-/* Bottom Navigation */
+/* ===== 底部導航 ===== */
 .bottom-nav {
-    position: fixed;
+    position: absolute;
     bottom: 0;
     left: 0;
-    right: 0;
-    height: 80px;
-    background: rgba(0, 0, 0, 0.9);
-    backdrop-filter: blur(20px);
-    display: flex !important;
+    width: 100%;
+    height: 141px;
+    background: #000;
+    display: flex;
     justify-content: space-around;
     align-items: center;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    z-index: 1000;
-    visibility: visible;
+    border-top: 1px solid #333;
 }
 
 .nav-item {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 60px;
-    height: 60px;
+    width: 100px;
+    height: 80px;
     cursor: pointer;
+    border-radius: 12px;
     transition: all 0.3s ease;
-    border-radius: 16px;
-}
-
-.nav-item.active {
-    background: rgba(255, 255, 255, 0.2);
+    background: transparent;
 }
 
 .nav-item:hover {
     background: rgba(255, 255, 255, 0.1);
 }
 
-.nav-icon {
-    width: 28px;
-    height: 28px;
-    background: rgba(255, 255, 255, 0.6);
-    border-radius: 6px;
-    transition: all 0.3s ease;
+.nav-item.active {
+    background: rgba(255, 255, 255, 0.2);
 }
 
-.nav-item.active .nav-icon {
-    background: rgba(255, 255, 255, 0.9);
+.nav-label {
+    font-family: 'NCTTorin Regular', sans-serif; /* 使用NCTTorin字體 */
+    font-size: 16px;
+    color: #aaa;
+    font-weight: 500;
 }
 
-.home-icon {
-    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+.nav-item.active .nav-label {
+    color: white;
 }
 
-.mode-icon {
-    border-radius: 50%;
-}
-
-.spatial-icon {
-    border-radius: 4px;
-}
-
-.profile-icon {
-    border-radius: 50%;
+/* ===== 頁面特殊背景 ===== */
+#home-page {
+    background: #939598;
     position: relative;
+    padding: 0;
 }
 
-.profile-icon::after {
-    content: '';
+#mode-page {
+    background: #939598; /* 與主頁一樣的灰色 */
+    position: relative;
+    padding: 0;
+}
+
+/* ===== 模式頁i圖標 ===== */
+#mode-page .info-icon {
     position: absolute;
-    top: 6px;
+    top: 145px; /* 與主頁一致 */
+    right: 51px; /* 與主頁一致 */
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'NCTTorin Regular', sans-serif;
+    font-size: 32px;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+/* ===== 粉紅色圓形 ===== */
+.pink-circle {
+    position: absolute;
+    top: 145px; /* 距離頂部145px */
     left: 50%;
     transform: translateX(-50%);
-    width: 8px;
-    height: 8px;
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 50%;
+    width: 445px;
+    height: 445px;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-    .mode-title {
-        font-size: 48px;
-    }
-    
-    .device-grid {
-        gap: 15px;
-    }
-    
-    .device-icon {
-        width: 70px;
-        height: 70px;
-    }
-    
-    .room-container {
-        max-width: 350px;
-        height: 350px;
-    }
-    
-    .mode-circle-wrapper {
-        width: 220px;
-        height: 220px;
-    }
-    .mode-circle {
-        width: 220px;
-        height: 220px;
-    }
-    .info-icon {
-        top: 24px;
-        right: 20px;
-        width: 28px;
-        height: 28px;
-        font-size: 16px;
-    }
-    .mode-page .mode-circle-wrapper {
-        margin-top: 24px;
-    }
+.circle-image {
+    width: 445px;
+    height: 445px;
+    border-radius: 50%; /* 圓角成圓形 */
+    object-fit: cover;
+    display: block;
 }
 
-/* Mode Info Modal Styles */
-.mode-info-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 1000;
-    display: none;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.mode-info-modal.show {
-    display: flex;
-    opacity: 1;
-    align-items: center;
-    justify-content: center;
-}
-
-.modal-backdrop {
+/* ===== RELAX標題 ===== */
+.mode-title {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(8px);
-}
-
-.modal-content {
-    position: relative;
-    background: #ffffff;
-    border-radius: 16px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-    max-width: 90vw;
-    max-height: 85vh;
-    width: 440px;
-    overflow: hidden;
-    transform: translateY(20px);
-    transition: transform 0.3s ease;
-}
-
-.mode-info-modal.show .modal-content {
-    transform: translateY(0);
-}
-
-.modal-header {
-    display: flex;
-    justify-content: flex-end;
-    padding: 20px 20px 0;
-}
-
-.modal-close {
-    background: none;
-    border: none;
-    font-size: 24px;
-    color: #666;
-    cursor: pointer;
-    padding: 0;
-    width: 28px;
-    height: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    transition: all 0.3s ease;
-}
-
-.modal-close:hover {
-    background: #edeef1;
-    color: #333;
-}
-
-.modal-body {
-    padding: 0 20px 20px;
-    overflow-y: auto;
-    max-height: calc(85vh - 60px);
-}
-
-.formula-title {
+    top: 638px; /* 距離頂部638px */
+    left: 50%;
+    transform: translateX(-50%);
     text-align: center;
-    margin-bottom: 24px;
-    padding-bottom: 0;
-    border-bottom: none;
 }
 
-.formula-title h3 {
-    margin: 0 0 4px 0;
-    font-size: 20px;
-    font-weight: 600;
+.relax-title-img {
+    height: 54px; /* 照片高度54px */
+    width: auto; /* 保持比例 */
+    display: block;
+}
+
+/* ===== 香味描述 ===== */
+.scent-description {
+    position: absolute;
+    top: 728px; /* 638 + 54 + 36 = 728px */
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'NCTTorin Regular', sans-serif;
+    font-size: 18px; /* 調整以達到高度22px */
+    line-height: 22px; /* 字體高度22px */
     color: #333;
-}
-
-.update-date {
-    font-size: 14px;
-    color: #666;
+    text-align: center;
     font-weight: 400;
 }
 
-.formula-section {
-    margin-bottom: 20px;
-}
-
-.formula-section h4 {
-    margin: 0 0 12px 0;
-    font-size: 15px;
-    font-weight: 600;
-    color: #333;
-    padding-left: 0;
-    border-left: none;
-}
-
-.adjustments-list {
+/* ===== 統計卡片容器 ===== */
+.stats-cards {
+    position: absolute;
+    top: 818px; /* 從Alarm卡片開始：1507 - 40 - 195*3 - 32*2 = 818px */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1150px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 32px; /* 卡片間距32px */
 }
 
-.adjustment-item {
-    display: flex;
-    align-items: center;
-    padding: 14px 16px;
-    background: #edeef1;
-    border-radius: 12px;
-    margin-bottom: 8px;
-    border: none;
-}
-
-.adjustment-type {
-    font-weight: 600;
-    color: #666;
-    margin-right: 8px;
-    min-width: 20px;
-}
-
-.adjustment-content {
-    flex: 1;
-}
-
-.ingredient-name {
-    font-weight: 600;
-    color: #333;
-}
-
-.percentage-change {
-    color: #666;
-    font-weight: 500;
-    margin-left: 8px;
-}
-
-.adjustment-reason {
-    font-size: 13px;
-    color: #666;
-    margin-top: 2px;
-}
-
-.core-scents {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.scent-item {
+/* ===== 統計卡片 ===== */
+.stat-card {
+    width: 1150px;
+    height: 195px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 14px 16px;
-    background: #e9e4da;
-    border-radius: 12px;
-    margin-bottom: 8px;
+    padding: 0 60px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
-.scent-name {
-    font-weight: 600;
-    color: #333;
-}
-
-.scent-effect {
-    font-size: 13px;
-    color: #666;
-    text-align: right;
-}
-
-.ai-summary {
-    background: #edeef1;
-    color: #333;
-    padding: 16px;
-    border-radius: 12px;
-    font-size: 14px;
-    line-height: 1.5;
-    margin: 0;
-}
-
-.expected-benefits {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-}
-
-.benefit-item {
-    background: #eaf4e9;
-    padding: 16px 12px;
-    border-radius: 12px;
-    text-align: center;
-    border: none;
-}
-
-.benefit-label {
-    font-size: 12px;
-    color: #666;
+.stat-left {
+    font-family: 'NCTTorin Regular', sans-serif;
+    font-size: 32px;
     font-weight: 500;
-    margin-bottom: 6px;
+    color: #333;
 }
 
-.benefit-value {
-    font-size: 16px;
+.stat-right {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    font-family: 'NCTTorin Regular', sans-serif;
+}
+
+.change-positive {
+    font-size: 24px;
+    font-weight: 600;
+    color: #E74C3C; /* 紅色變化 */
+}
+
+.stat-time {
+    font-size: 32px;
     font-weight: 600;
     color: #333;
-    margin-top: 0;
 }
 
-/* Responsive Design */
-@media (max-width: 480px) {
-    .modal-content {
-        width: 95vw;
-        margin: 20px;
-    }
-    
-    .modal-body {
-        padding: 0 20px 20px;
-    }
-    
-    .expected-benefits {
-        grid-template-columns: 1fr;
-    }
+/* 當stat-right只有一個元素時（Alarm卡片） */
+.stat-card:nth-child(1) .stat-right {
+    font-size: 32px;
+    font-weight: 600;
+    color: #333;
+}
+
+#spatial-page {
+    background: #939598; /* 改為與主頁一樣的灰色 */
+    position: relative;
+    padding: 0;
+}
+
+/* ===== 空間頁頂部文字區 ===== */
+.spatial-header {
+    position: relative;
+    padding: 80px 0 0 0; /* 距離頂部80px */
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-left: 60px;
+    padding-right: 51px; /* 配合i圖標位置 */
+}
+
+.greeting-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.hello-title {
+    font-family: 'NCTTorin Regular', sans-serif;
+    font-size: 42px; /* 調整以達到高度52px */
+    font-weight: 600;
+    color: white;
+    margin: 0;
+    line-height: 52px; /* 精確控制高度 */
+}
+
+.help-subtitle {
+    font-family: 'NCTTorin Regular', sans-serif;
+    font-size: 24px; /* 調整以達到高度32px */
+    color: rgba(255, 255, 255, 0.8);
+    margin: 8px 0 0 0;
+    line-height: 32px; /* 精確控制高度 */
+}
+
+.spatial-header .info-icon {
+    position: absolute;
+    top: 80px; /* 與主頁一致 */
+    right: 51px; /* 與主頁一致 */
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'NCTTorin Regular', sans-serif;
+    font-size: 32px;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+/* ===== 3D房間圖片容器 ===== */
+.room-container {
+    position: absolute;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    bottom: 185px; /* 距離底部185px */
+}
+
+.room-image {
+    width: 1166px; /* 指定寬度 */
+    height: auto; /* 保持比例 */
+    display: block;
+}
+
+/* ===== 導航圓點 ===== */
+.room-dots {
+    position: absolute;
+    bottom: 130px; /* 在Living Room標籤上方 */
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.nav-dot {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.nav-dot.active {
+    background: rgba(255, 255, 255, 0.8);
+}
+
+.nav-dot:hover {
+    background: rgba(255, 255, 255, 0.6);
+}
+
+/* ===== Living Room 標籤 ===== */
+.room-label {
+    position: absolute;
+    bottom: 40px; /* 距離工作列40px */
+    left: calc(50% - 583px); /* 左對齊照片左側：中心點減去照片寬度的一半 (1166/2 = 583) */
+    width: 300px; /* 縮短寬度從350px到300px */
+    height: 75px;
+    background: #f7941d;
+    border-radius: 37.5px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* 左對齊內容 */
+    gap: 16px;
+    padding: 0 24px; /* 左右內邊距 */
+    box-shadow: 0 4px 16px rgba(247, 148, 29, 0.3);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.room-label:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(247, 148, 29, 0.4);
+}
+
+/* 加號的半透明白色圈圈 */
+.add-icon {
+    width: 53px;
+    height: 53px;
+    background: rgba(255, 255, 255, 0.3); /* 半透明白色圈圈 */
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'NCTTorin Regular', sans-serif;
+    font-size: 24px; /* 稍微縮小字體確保居中 */
+    font-weight: bold;
+    color: white; /* 白色加號 */
+    flex-shrink: 0; /* 防止被壓縮 */
+    text-align: center; /* 確保文字居中 */
+    line-height: 1; /* 確保行高為1避免偏移 */
+}
+
+.room-name {
+    font-family: 'NCTTorin Regular', sans-serif;
+    font-size: 24px; /* 與主頁一致 */
+    font-weight: 600;
+    color: black; /* 黑色字體 */
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    flex: 1; /* 佔據剩餘空間 */
+}
+
+/* ===== 主頁頂部標題區 ===== */
+.header-section {
+    position: relative;
+    text-align: center;
+    padding: 145px 0 40px 0; /* RELAX圖片距離頂部145px */
+    width: 100%;
+}
+
+.main-title-img {
+    width: 307px; /* 用戶指定的寬度 */
+    height: auto; /* 保持比例 */
+    display: block;
+    margin: 0 auto;
+}
+
+.trigger-time {
+    font-family: 'NCTTorin Regular', sans-serif; /* 使用NCTTorin字體 */
+    font-size: 16pt; /* 縮小字體從21pt到16pt */
+    color: white;
+    margin-top: 8px;
+    font-weight: 400;
+}
+
+.info-icon {
+    position: absolute;
+    top: 145px; /* 與RELAX圖片一致 */
+    right: 51px; /* 與右邊卡片對齊 */
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'NCTTorin Regular', sans-serif; /* 使用NCTTorin字體 */
+    font-size: 32px;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+/* ===== Living Room 標籤 ===== */
+.room-tag {
+    position: absolute;
+    top: 326px; /* Living Room標籤距離頂部326px */
+    left: 51px; /* 與左邊卡片對齊 */
+    width: 270px;
+    height: 75px;
+    background: #f7941d;
+    border-radius: 37.5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'NCTTorin Regular', sans-serif; /* 使用NCTTorin字體 */
+    font-size: 24px;
+    font-weight: 600;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 16px rgba(247, 148, 29, 0.3);
+}
+
+/* ===== 卡片容器 ===== */
+.cards-container {
+    position: absolute;
+    top: 0; /* 使用絕對定位，不需要容器偏移 */
+    left: 51px;
+    width: calc(1237px - 102px); /* 減去左右邊距 */
+    height: 100%;
+}
+
+/* ===== 照片卡片基本樣式 ===== */
+.photo-card {
+    position: absolute;
+    border-radius: 48px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.photo-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+}
+
+.photo-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* ===== 具體卡片位置 - 使用絕對定位 ===== */
+/* 左上卡片 - prototype.png：距離頂部433.5px */
+.card-top-left {
+    left: 0;
+    top: 433.5px; /* 絕對距離頂部433.5px */
+    width: 542px;
+    height: 500px;
+}
+
+/* 左下卡片 - bub.png：距離頂部968px */
+.card-bottom-left {
+    left: 0;
+    top: 968px; /* 絕對距離頂部968px */
+    width: 542px;
+    height: 500px;
+}
+
+/* 右側大卡片 - lamp.png：距離頂部433.5px */
+.card-right-large {
+    left: 593px; /* 542 + 51間距 */
+    top: 433.5px; /* 絕對距離頂部433.5px */
+    width: 542px;
+    height: 1034px;
 }

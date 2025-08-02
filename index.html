@@ -2,223 +2,139 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=1237, initial-scale=1.0, user-scalable=no">
     <title>ÔDÔRAI - Scent Intelligence</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Main Container -->
-    <div class="app-container">
-        <!-- Home Page - Trigger Interface -->
-        <div class="page home-page active" id="home-page">
-            <canvas id="scent-canvas"></canvas>
-            <div class="ambient-overlay">
-                <p class="ambient-text">
-                    started diffusing on its own.<br>
-                    Seriously? Did you set it up that<br>
-                    way? Nope, I think it detected <span class="highlight">my<br>
-                    heart rate</span> or something... this is <span class="highlight">like<br>
-                    the third time today</span>. Can we switch
-                </p>
-            </div>
-
-            <div class="mode-display">
-                <h1 class="mode-title" id="home-mode-title">RELAX</h1>
-                <p class="trigger-time" id="trigger-time">16:53 Trigger</p>
-            </div>
-
-            <div class="device-grid">
-                <div class="device-icon diffuser active" data-device="diffuser">
-                    <img src="assets/images/diffuser.png" alt="Diffuser" class="device-img">
-                </div>
-                <div class="device-icon lamp" data-device="lamp">
-                    <img src="assets/images/lamp.png" alt="Lamp" class="device-img">
-                </div>
-                <div class="device-icon speaker" data-device="speaker">
-                    <img src="assets/images/speaker.png" alt="Speaker" class="device-img">
-                </div>
-            </div>
-
-            <button class="add-device-btn">
-                <span class="plus-icon">+</span>
-            </button>
-        </div>
-
-        <!-- Mode Page -->
-        <div class="page mode-page" id="mode-page">
-            <div class="info-icon">i</div>
-            <div class="mode-circle-wrapper">
-                <div class="mode-circle">
-                    <div class="scent-visual">
-                        <div class="scent-particles"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="mode-dots">
-                <div class="dot"></div>
-                <div class="dot middle"></div>
-                <div class="dot"></div>
-            </div>
-
-            <div class="mode-info">
-                <p class="current-mode-label">Current Mode</p>
-                <h2 class="mode-name" id="mode-name">RELAX</h2>
-                <p class="scent-blend" id="scent-blend">Jasmine + Lavender + Frankincense</p>
-            </div>
-
-            <div class="stats-container">
-                <div class="stat-row">
-                    <div class="stat-label">Alarm | Wake up</div>
-                    <div class="stat-value">AM 07:03</div>
-                </div>
-                <div class="stat-row sleep-stat">
-                    <div class="stat-label">Sleep | Total time</div>
-                    <div class="stat-value">
-                        <span class="change-indicator">+2.2%</span>
-                        <span class="time-value">8hr 48m</span>
-                    </div>
-                </div>
-                <div class="stat-row focus-stat">
-                    <div class="stat-label">Focus</div>
-                    <div class="stat-value">
-                        <span class="change-indicator positive">+5.8%</span>
-                        <span class="time-value">1hr 03m</span>
-                    </div>
-                </div>
-            </div>
+    <!-- 固定比例容器 - iPad Pro 12.9" 專用 (1237x1650) -->
+    <div class="fixed-ratio-container">
+        <!-- 主容器 -->
+        <div class="app-container">
             
-            <!-- Mode Info Modal -->
-            <div class="mode-info-modal" id="mode-info-modal">
-                <div class="modal-backdrop"></div>
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button class="modal-close">&times;</button>
+            <!-- 第1頁 - 主頁 -->
+            <div class="page active" id="home-page">
+                <!-- 頂部標題區 -->
+                <div class="header-section">
+                    <img src="./assets/images/RELAX.png" alt="RELAX" class="main-title-img">
+                    <div class="trigger-time">16:53 Trigger</div>
+                    <div class="info-icon">i</div>
+                </div>
+                
+                <!-- Living Room 標籤 -->
+                <div class="room-tag">Living Room</div>
+                
+                <!-- 三張照片卡片佈局 -->
+                <div class="cards-container">
+                    <!-- 左上照片 - prototype.png -->
+                    <div class="photo-card card-top-left">
+                        <img src="./assets/images/prototype.png" alt="Prototype">
                     </div>
-                    <div class="modal-body">
-                        <div class="formula-title">
-                            <h3 id="modal-formula-name">Yves's RELAX Formula</h3>
-                            <span class="update-date">(August 2025 Personalize Recipe)</span>
-                        </div>
-                        
-                        <div class="formula-section">
-                            <h4>Monthly Adjustments (Based on July and Previous Data)</h4>
-                            <div class="adjustments-list" id="modal-adjustments">
-                                <!-- Dynamic content will be inserted here -->
-                            </div>
-                        </div>
-                        
-                        <div class="formula-section">
-                            <h4>Core Scent & Effects</h4>
-                            <div class="core-scents" id="modal-core-scents">
-                                <!-- Dynamic content will be inserted here -->
-                            </div>
-                        </div>
-                        
-                        <div class="formula-section">
-                            <h4>ODORAI Analysis Summary</h4>
-                            <div class="ai-summary" id="modal-ai-summary">
-                                <!-- Dynamic content will be inserted here -->
-                            </div>
-                        </div>
-                        
-                        <div class="formula-section">
-                            <h4>Expected Benefits This Month</h4>
-                            <div class="expected-benefits" id="modal-benefits">
-                                <!-- Dynamic content will be inserted here -->
-                            </div>
-                        </div>
+                    
+                    <!-- 左下照片 - bub.png -->
+                    <div class="photo-card card-bottom-left">
+                        <img src="./assets/images/bub.png" alt="Bub">
+                    </div>
+                    
+                    <!-- 右側大照片 - lamp.png -->
+                    <div class="photo-card card-right-large">
+                        <img src="./assets/images/lamp.png" alt="Lamp">
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Spatial Page -->
-        <div class="page spatial-page" id="spatial-page">
-            <div class="spatial-header">
-                <div class="spatial-greeting">
-                    <h2>Hello, Yves !</h2>
-                    <p>Anything I can help you with?</p>
-                </div>
+            <!-- 第2頁 - 模式頁 -->
+            <div class="page" id="mode-page">
+                <!-- i圖標 -->
                 <div class="info-icon">i</div>
-            </div>
-
-            <div class="room-scene">
-                <div class="room-background">
-                    <!-- 房間背景圖片作為背景 -->
+                
+                <!-- 粉紅色圓形 -->
+                <div class="pink-circle">
+                    <img src="./assets/images/relax_color.png" alt="Relax Color" class="circle-image">
+                </div>
+                
+                <!-- RELAX標題 -->
+                <div class="mode-title">
+                    <img src="./assets/images/RELAX.png" alt="RELAX" class="relax-title-img">
+                </div>
+                
+                <!-- 香味描述 -->
+                <div class="scent-description">Lavender + Bergamot + Cedarwood</div>
+                
+                <!-- 統計卡片 -->
+                <div class="stats-cards">
+                    <!-- 卡片1: Alarm -->
+                    <div class="stat-card">
+                        <div class="stat-left">Alarm | Wake up</div>
+                        <div class="stat-right">AM 07:03</div>
+                    </div>
                     
-                    <!-- 設備圖標 -->
-                    <div class="device-overlays">
-                        <!-- 黑色機器人設備 -->
-                        <div class="room-device robot-device" data-device="diffuser" style="top: 60%; left: 30%;">
-                            <div class="device-icon">🤖</div>
-                            <div class="device-status active"></div>
-                        </div>
-                        
-                        <!-- 粉色燈設備 -->
-                        <div class="room-device lamp-device" data-device="lamp" style="top: 40%; right: 20%;">
-                            <div class="device-icon">💡</div>
-                            <div class="device-status"></div>
-                        </div>
-                        
-                        <!-- 藍色音響設備 -->
-                        <div class="room-device speaker-device" data-device="speaker" style="bottom: 30%; left: 50%;">
-                            <div class="device-icon">🔊</div>
-                            <div class="device-status"></div>
+                    <!-- 卡片2: Sleep -->
+                    <div class="stat-card">
+                        <div class="stat-left">Sleep | Total time</div>
+                        <div class="stat-right">
+                            <span class="change-positive">+2.2%</span>
+                            <span class="stat-time">8hr 48m</span>
                         </div>
                     </div>
                     
-                    <!-- 添加設備按鈕 -->
-                    <div class="add-device-points">
-                        <div class="add-point" style="top: 70%; left: 15%;">
-                            <div class="add-icon">+</div>
+                    <!-- 卡片3: Focus -->
+                    <div class="stat-card">
+                        <div class="stat-left">Focus</div>
+                        <div class="stat-right">
+                            <span class="change-positive">+5.8%</span>
+                            <span class="stat-time">1hr 03m</span>
                         </div>
-                        <div class="add-point" style="bottom: 15%; right: 30%;">
-                            <div class="add-icon">+</div>
-                        </div>
-                        <div class="add-point" style="top: 30%; left: 60%;">
-                            <div class="add-icon">+</div>
-                        </div>
-                    </div>
-                    
-                    <!-- 氣味可視化 -->
-                    <div class="scent-visualizations">
-                        <div class="scent-area" style="top: 40%; left: 20%; width: 80px; height: 80px;"></div>
-                        <div class="scent-area" style="top: 30%; right: 10%; width: 60px; height: 60px;"></div>
-                        <div class="scent-area" style="bottom: 20%; left: 35%; width: 70px; height: 70px;"></div>
                     </div>
                 </div>
             </div>
-            
-            <div class="room-dots">
-                <div class="dot"></div>
-                <div class="dot middle"></div>
-                <div class="dot"></div>
+
+            <!-- 第3頁 - 空間頁 -->
+            <div class="page" id="spatial-page">
+                <!-- 頂部文字區 -->
+                <div class="spatial-header">
+                    <div class="greeting-text">
+                        <h1 class="hello-title">Hello, Yves !</h1>
+                        <p class="help-subtitle">Anything I can help you with?</p>
+                    </div>
+                    <div class="info-icon">i</div>
+                </div>
+                
+                <!-- 3D房間圖片 -->
+                <div class="room-container">
+                    <img src="./assets/images/LivingRoom-bg.png" alt="Living Room" class="room-image">
+                </div>
+                
+                <!-- 導航圓點 -->
+                <div class="room-dots">
+                    <div class="nav-dot"></div>
+                    <div class="nav-dot active"></div>
+                    <div class="nav-dot"></div>
+                </div>
+                
+                <!-- Living Room 標籤 -->
+                <div class="room-label">
+                    <span class="add-icon">+</span>
+                    <span class="room-name">Living Room</span>
+                </div>
             </div>
-            
-            <div class="room-label">
-                <div class="room-icon">🏠</div>
-                <span>Living Room</span>
+
+        </div>
+
+        <!-- 底部導航 - 3個按鈕 -->
+        <div class="bottom-nav">
+            <div class="nav-item active" data-page="home-page">
+                <div class="nav-label">主頁</div>
+            </div>
+            <div class="nav-item" data-page="mode-page">
+                <div class="nav-label">模式</div>
+            </div>
+            <div class="nav-item" data-page="spatial-page">
+                <div class="nav-label">空間</div>
             </div>
         </div>
     </div>
 
-    <!-- Bottom Navigation -->
-    <div class="bottom-nav">
-        <div class="nav-item active" data-page="home-page">
-            <div class="nav-icon home-icon"></div>
-        </div>
-        <div class="nav-item" data-page="mode-page">
-            <div class="nav-icon mode-icon"></div>
-        </div>
-        <div class="nav-item" data-page="spatial-page">
-            <div class="nav-icon spatial-icon"></div>
-        </div>
-        <div class="nav-item">
-            <div class="nav-icon profile-icon"></div>
-        </div>
-    </div>
-
-    <script src="correct-scent-system.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
