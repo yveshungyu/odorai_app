@@ -33,12 +33,12 @@ body {
 /* ===== 固定比例容器 ===== */
 .fixed-ratio-container {
     width: 1237px;
-    height: 1650px;
+    height: 1581px;
     position: relative;
     background: #222;
     border-radius: 24px;
-    overflow: hidden;
-    transform: scale(min(calc(100vw / 1237), calc(100vh / 1650)));
+    overflow: visible; /* 允許模態窗口顯示在容器外 */
+    transform: scale(min(calc(100vw / 1237), calc(100vh / 1581)));
     box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
 }
 
@@ -88,6 +88,308 @@ body {
     font-size: 24px;
     color: #aaa;
     margin-bottom: 40px;
+}
+
+/* ===== 信息模態窗口樣式 ===== */
+.info-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: none;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.info-modal.show {
+    display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+}
+
+.modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
+}
+
+.modal-content {
+    position: relative;
+    margin: auto;
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    background: linear-gradient(145deg, #1a1a1a 0%, #2a2a2a 100%);
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    padding: 30px 30px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    font-family: 'Utah Condensed Bold', sans-serif;
+    font-size: 24px;
+    color: #fff;
+    margin: 0;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    color: #999;
+    font-size: 32px;
+    cursor: pointer;
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.modal-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+.modal-body {
+    padding: 20px 30px 30px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.info-section {
+    margin-bottom: 25px;
+}
+
+.info-section:last-child {
+    margin-bottom: 0;
+}
+
+.info-section h4 {
+    font-family: 'Utah Condensed Bold', sans-serif;
+    font-size: 18px;
+    color: #FF6B95;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.info-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.info-section li {
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    color: #ccc;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.info-section li:last-child {
+    border-bottom: none;
+}
+
+.info-section li strong {
+    color: #fff;
+    font-weight: 600;
+}
+
+/* 模式信息專用樣式 */
+.adjustment-item, .scent-item, .benefit-item {
+    padding: 15px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.adjustment-item:last-child, .scent-item:last-child, .benefit-item:last-child {
+    border-bottom: none;
+}
+
+.adjustment-type, .scent-name, .benefit-label {
+    color: #4FACFE;
+    font-weight: 600;
+    font-size: 14px;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.ingredient-name {
+    color: #fff;
+    font-weight: 500;
+}
+
+.percentage-change {
+    color: #43E97B;
+    font-size: 12px;
+    margin-left: 8px;
+}
+
+.adjustment-reason, .scent-effect {
+    color: #999;
+    font-size: 12px;
+    line-height: 1.4;
+    margin-top: 5px;
+}
+
+.benefit-value {
+    color: #43E97B;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+/* ===== 簡化模態窗口樣式 ===== */
+.simple-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+}
+
+.simple-modal-content {
+    position: relative;
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    background: linear-gradient(145deg, #1a1a1a 0%, #2a2a2a 100%);
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    animation: modalSlideIn 0.3s ease-out;
+    z-index: 10001;
+}
+
+.simple-modal-header {
+    padding: 30px 30px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, #FF6B95 0%, #FFA726 100%);
+}
+
+.simple-modal-header h3 {
+    font-family: 'Utah Condensed Bold', sans-serif;
+    font-size: 24px;
+    color: #fff;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.simple-modal-close {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 32px;
+    cursor: pointer;
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.simple-modal-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    transform: scale(1.1);
+}
+
+.simple-modal-body {
+    padding: 30px;
+    max-height: 60vh;
+    overflow-y: auto;
+    color: #fff;
+}
+
+.info-content h4 {
+    font-family: 'Utah Condensed Bold', sans-serif;
+    font-size: 18px;
+    color: #FF6B95;
+    margin-bottom: 15px;
+    margin-top: 25px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.info-content h4:first-child {
+    margin-top: 0;
+}
+
+.info-content ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px 0;
+}
+
+.info-content li {
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    color: #ccc;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.info-content li:last-child {
+    border-bottom: none;
+}
+
+.info-content li strong {
+    color: #fff;
+    font-weight: 600;
+}
+
+.info-content p {
+    color: #ccc;
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+
+.info-content p strong {
+    color: #4FACFE;
+    font-weight: 600;
 }
 
 /* ===== 底部導航 ===== */
@@ -152,7 +454,7 @@ body {
 /* ===== 模式頁i圖標 ===== */
 #mode-page .info-icon {
     position: absolute;
-    top: 145px; /* 與主頁一致 */
+    top: 77px; /* 145 - 68 = 77px */
     right: 51px; /* 與主頁一致 */
     width: 80px;
     height: 80px;
@@ -173,7 +475,7 @@ body {
 /* ===== 粉紅色圓形 ===== */
 .pink-circle {
     position: absolute;
-    top: 145px; /* 距離頂部145px */
+    top: 77px; /* 145 - 68 = 77px */
     left: 50%;
     transform: translateX(-50%);
     width: 445px;
@@ -191,7 +493,7 @@ body {
 /* ===== RELAX標題 ===== */
 .mode-title {
     position: absolute;
-    top: 638px; /* 距離頂部638px */
+    top: 570px; /* 638 - 68 = 570px */
     left: 50%;
     transform: translateX(-50%);
     text-align: center;
@@ -206,7 +508,7 @@ body {
 /* ===== 香味描述 ===== */
 .scent-description {
     position: absolute;
-    top: 728px; /* 638 + 54 + 36 = 728px */
+    top: 660px; /* 728 - 68 = 660px */
     left: 50%;
     transform: translateX(-50%);
     font-family: 'NCTTorin Regular', sans-serif;
@@ -220,7 +522,7 @@ body {
 /* ===== 統計卡片容器 ===== */
 .stats-cards {
     position: absolute;
-    top: 818px; /* 從Alarm卡片開始：1507 - 40 - 195*3 - 32*2 = 818px */
+    top: 750px; /* 818 - 68 = 750px */
     left: 50%;
     transform: translateX(-50%);
     width: 1150px;
@@ -284,7 +586,7 @@ body {
 /* ===== 空間頁頂部文字區 ===== */
 .spatial-header {
     position: relative;
-    padding: 80px 0 0 0; /* 距離頂部80px */
+    padding: 77px 0 0 0; /* 與其他頁面對齊 */
     width: 100%;
     display: flex;
     justify-content: space-between;
@@ -318,7 +620,7 @@ body {
 
 .spatial-header .info-icon {
     position: absolute;
-    top: 80px; /* 與主頁一致 */
+    top: 77px; /* 與其他頁面對齊 */
     right: 51px; /* 與主頁一致 */
     width: 80px;
     height: 80px;
@@ -334,6 +636,16 @@ body {
     cursor: pointer;
     backdrop-filter: blur(10px);
     border: 2px solid rgba(255, 255, 255, 0.3);
+    z-index: 100;
+    transition: all 0.3s ease;
+    user-select: none;
+    pointer-events: auto;
+}
+
+.spatial-header .info-icon:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+    border-color: rgba(255, 255, 255, 0.5);
 }
 
 /* ===== 3D房間圖片容器 ===== */
@@ -342,7 +654,7 @@ body {
     width: 100%;
     display: flex;
     justify-content: center;
-    bottom: 185px; /* 距離底部185px */
+    bottom: 116px; /* 185 - 69 = 116px (調整container高度差異) */
 }
 
 .room-image {
@@ -354,7 +666,7 @@ body {
 /* ===== 導航圓點 ===== */
 .room-dots {
     position: absolute;
-    bottom: 130px; /* 在Living Room標籤上方 */
+    bottom: 61px; /* 130 - 69 = 61px */
     left: 50%;
     transform: translateX(-50%);
     display: flex;
@@ -382,7 +694,7 @@ body {
 /* ===== Living Room 標籤 ===== */
 .room-label {
     position: absolute;
-    bottom: 40px; /* 距離工作列40px */
+    bottom: 40px; /* 保持距離底部導航40px */
     left: calc(50% - 583px); /* 左對齊照片左側：中心點減去照片寬度的一半 (1166/2 = 583) */
     width: 300px; /* 縮短寬度從350px到300px */
     height: 75px;
@@ -435,7 +747,7 @@ body {
 .header-section {
     position: relative;
     text-align: center;
-    padding: 145px 0 40px 0; /* RELAX圖片距離頂部145px */
+    padding: 77px 0 40px 0; /* 145 - 68 = 77px */
     width: 100%;
 }
 
@@ -456,7 +768,7 @@ body {
 
 .info-icon {
     position: absolute;
-    top: 145px; /* 與RELAX圖片一致 */
+    top: 77px; /* 145 - 68 = 77px */
     right: 51px; /* 與右邊卡片對齊 */
     width: 80px;
     height: 80px;
@@ -472,12 +784,26 @@ body {
     cursor: pointer;
     backdrop-filter: blur(10px);
     border: 2px solid rgba(255, 255, 255, 0.3);
+    z-index: 100;
+    transition: all 0.3s ease;
+    user-select: none;
+    pointer-events: auto;
+}
+
+.info-icon:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.info-icon:active {
+    transform: scale(0.95);
 }
 
 /* ===== Living Room 標籤 ===== */
 .room-tag {
     position: absolute;
-    top: 326px; /* Living Room標籤距離頂部326px */
+    top: 258px; /* 326 - 68 = 258px */
     left: 51px; /* 與左邊卡片對齊 */
     width: 270px;
     height: 75px;
@@ -530,7 +856,7 @@ body {
 /* 左上卡片 - prototype.png：距離頂部433.5px */
 .card-top-left {
     left: 0;
-    top: 433.5px; /* 絕對距離頂部433.5px */
+    top: 365.5px; /* 433.5 - 68 = 365.5px */
     width: 542px;
     height: 500px;
 }
@@ -538,7 +864,7 @@ body {
 /* 左下卡片 - bub.png：距離頂部968px */
 .card-bottom-left {
     left: 0;
-    top: 968px; /* 絕對距離頂部968px */
+    top: 900px; /* 968 - 68 = 900px */
     width: 542px;
     height: 500px;
 }
@@ -546,7 +872,7 @@ body {
 /* 右側大卡片 - lamp.png：距離頂部433.5px */
 .card-right-large {
     left: 593px; /* 542 + 51間距 */
-    top: 433.5px; /* 絕對距離頂部433.5px */
+    top: 365.5px; /* 433.5 - 68 = 365.5px */
     width: 542px;
     height: 1034px;
 }

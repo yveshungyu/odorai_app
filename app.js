@@ -77,6 +77,67 @@ class OdoraiApp {
                 positive: true
             }
         };
+
+        // 模式詳細信息數據
+        this.modeInfoData = {
+            relax: {
+                title: '🌙 RELAX 舒緩模式',
+                coreScents: [
+                    { name: '薰衣草', effect: '深度放鬆，舒緩神經' },
+                    { name: '佛手柑', effect: '減輕壓力，平衡情緒' },
+                    { name: '雪松木', effect: '穩定心境，促進安眠' }
+                ],
+                adjustments: [
+                    { type: '增強', ingredient: '薰衣草', change: '+15%', reason: '根據環境噪音自動調整' },
+                    { type: '優化', ingredient: '佛手柑', change: '+8%', reason: '配合晚間時段' },
+                    { type: '平衡', ingredient: '雪松木', change: '±0%', reason: '維持基礎濃度' }
+                ],
+                aiSummary: '基於你的睡眠數據和環境感測，AI 建議在晚間時段增強薰衣草濃度 15%，以達到最佳的放鬆效果。此配方已被證實能提升 87% 的用戶深度睡眠時間。',
+                benefits: [
+                    { label: '平均入睡時間', value: '12 分鐘' },
+                    { label: '深度睡眠提升', value: '+27%' },
+                    { label: '壓力指數降低', value: '-34%' }
+                ]
+            },
+            focus: {
+                title: '🎯 FOCUS 專注模式',
+                coreScents: [
+                    { name: '薄荷', effect: '提升警覺性，清醒大腦' },
+                    { name: '迷迭香', effect: '增強記憶力，促進思考' },
+                    { name: '尤加利', effect: '淨化空氣，保持清新' }
+                ],
+                adjustments: [
+                    { type: '增強', ingredient: '薄荷', change: '+20%', reason: '配合工作時段需求' },
+                    { type: '提升', ingredient: '迷迭香', change: '+12%', reason: '基於專注時間數據' },
+                    { type: '穩定', ingredient: '尤加利', change: '+5%', reason: '維持空氣品質' }
+                ],
+                aiSummary: 'AI 分析你的專注模式使用習慣，建議在工作時段強化薄荷與迷迭香濃度，可提升 43% 的專注持續時間，並降低 28% 的分心頻率。',
+                benefits: [
+                    { label: '專注時間延長', value: '+43%' },
+                    { label: '工作效率提升', value: '+31%' },
+                    { label: '分心次數減少', value: '-28%' }
+                ]
+            },
+            energize: {
+                title: '⚡ ENERGIZE 活力模式',
+                coreScents: [
+                    { name: '柑橘', effect: '振奮精神，提升活力' },
+                    { name: '生薑', effect: '刺激循環，增強動力' },
+                    { name: '檸檬草', effect: '清新怡人，保持正能量' }
+                ],
+                adjustments: [
+                    { type: '激活', ingredient: '柑橘', change: '+25%', reason: '晨間喚醒配方' },
+                    { type: '強化', ingredient: '生薑', change: '+18%', reason: '提升身體活力' },
+                    { type: '優化', ingredient: '檸檬草', change: '+10%', reason: '持續正向情緒' }
+                ],
+                aiSummary: '晨間活力配方經 AI 優化，結合你的生理節律數據，在早晨 7-10 點使用可獲得最佳提神效果，能量水平提升可持續 4-6 小時。',
+                benefits: [
+                    { label: '能量水平提升', value: '+52%' },
+                    { label: '晨間活力持續', value: '4-6 小時' },
+                    { label: '正面情緒增加', value: '+38%' }
+                ]
+            }
+        };
         
         this.init();
         this.loadPositionsFromStorage();
@@ -85,7 +146,15 @@ class OdoraiApp {
     init() {
         console.log('Initializing ÔDÔRAI app...');
         
-        this.setupEventListeners();
+        // 確保 DOM 完全加載後再設置事件監聽器
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                this.setupEventListeners();
+            });
+        } else {
+            this.setupEventListeners();
+        }
+        
         this.updateUI();
         this.initScentSystem();
         
@@ -99,6 +168,32 @@ class OdoraiApp {
         setInterval(() => this.updateStats(), 30000);
         
         console.log('ÔDÔRAI app fully initialized');
+        
+        // 延遲1秒後進行info-icon調試檢查
+        setTimeout(() => {
+            this.checkInfoIcons();
+        }, 1000);
+    }
+    
+    // 檢查 info-icon 功能
+    checkInfoIcons() {
+        const allInfoIcons = document.querySelectorAll('.info-icon');
+        console.log(`✅ Info-icon 功能檢查 - 找到 ${allInfoIcons.length} 個圖標`);
+        
+        allInfoIcons.forEach((icon, index) => {
+            const pageId = icon.closest('.page')?.id;
+            const styles = window.getComputedStyle(icon);
+            console.log(`🔍 Info-icon ${index + 1}:`, {
+                pageId,
+                display: styles.display,
+                visibility: styles.visibility,
+                pointerEvents: styles.pointerEvents,
+                zIndex: styles.zIndex,
+                position: styles.position
+            });
+        });
+        
+        console.log('💡 所有 info-icon 應該有粉紅色邊框，點擊測試功能');
     }
     
     setupEventListeners() {
@@ -125,8 +220,8 @@ class OdoraiApp {
             this.cycleModes();
         });
         
-        // Mode info modal
-        this.setupModeInfoModal();
+        // Info icon modals
+        this.setupInfoModals();
         
         // Mode-page swipe for mode switching only
         this.setupModePageSwipe();
@@ -1247,46 +1342,315 @@ class OdoraiApp {
         }, 5000);
     }
 
-    setupModeInfoModal() {
-        // Mode page info icon click
-        const modePageInfoIcon = document.querySelector('.mode-page .info-icon');
-        if (modePageInfoIcon) {
-            modePageInfoIcon.addEventListener('click', () => {
-                this.showModeInfo();
-            });
-        }
-
-        // Modal close events
-        const modal = document.getElementById('mode-info-modal');
-        const closeBtn = modal.querySelector('.modal-close');
-        const backdrop = modal.querySelector('.modal-backdrop');
-
-        closeBtn.addEventListener('click', () => this.closeModeInfo());
-        backdrop.addEventListener('click', () => this.closeModeInfo());
+    setupInfoModals() {
+        console.log('🔧 設置 info-icon 事件監聽器...');
         
-        // Escape key to close
+        // 使用事件委托來處理所有 info-icon 點擊
+        document.addEventListener('click', (e) => {
+            console.log('🖱️ 點擊事件觸發:', e.target);
+            
+            if (e.target.closest('.info-icon')) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const infoIcon = e.target.closest('.info-icon');
+                const currentPage = document.querySelector('.page.active');
+                const pageId = currentPage ? currentPage.id : '';
+                
+                console.log('🎯 Info-icon 被點擊!', { 
+                    element: infoIcon, 
+                    pageId, 
+                    currentPage: currentPage 
+                });
+                
+                // 簡單測試 - 先顯示一個基本提示
+                alert(`點擊了 ${pageId} 的 info-icon!`);
+                
+                // 根據當前活躍頁面顯示對應內容
+                switch (pageId) {
+                    case 'home-page':
+                        console.log('🏠 顯示主頁信息');
+                        this.showSimpleModal('🏠 ÔDÔRAI App Guide', this.getHomeContent());
+                        break;
+                    case 'mode-page':
+                        console.log('🎨 顯示模式信息');
+                        this.showSimpleModal('🎨 ' + this.modes[this.currentMode].name + ' Mode Details', this.getModeContent());
+                        break;
+                    case 'spatial-page':
+                        console.log('🏠 顯示空間信息');
+                        this.showSimpleModal('🏠 Spatial Control Center', this.getSpatialContent());
+                        break;
+                    default:
+                        console.log('📱 顯示通用信息');
+                        this.showSimpleModal('📱 Information', 'This is an information dialog.');
+                        break;
+                }
+            }
+        });
+        
+        // 額外添加直接綁定到每個 info-icon 的事件監聽器
+        setTimeout(() => {
+            const allInfoIcons = document.querySelectorAll('.info-icon');
+            console.log(`🔍 找到 ${allInfoIcons.length} 個 info-icon 元素`);
+            
+            allInfoIcons.forEach((icon, index) => {
+                const pageId = icon.closest('.page')?.id;
+                console.log(`📌 Info-icon ${index + 1} 在頁面: ${pageId}`);
+                
+                // 直接綁定點擊事件
+                icon.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log(`🎯 直接綁定: Info-icon ${index + 1} 被點擊!`);
+                    alert(`直接綁定成功! 點擊了 ${pageId} 的 info-icon!`);
+                });
+                
+                // 添加視覺標記
+                icon.style.border = '2px solid #FF6B95';
+                icon.style.boxShadow = '0 0 10px rgba(255, 107, 149, 0.5)';
+            });
+        }, 500);
+        
+        console.log('✅ Info-icon 事件監聽器已設置');
+    }
+
+    setupModalCloseEvents() {
+        // 為所有模態窗口設置關閉事件
+        const modals = ['home-info-modal', 'mode-info-modal'];
+        
+        modals.forEach(modalId => {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                const closeBtn = modal.querySelector('.modal-close');
+                const backdrop = modal.querySelector('.modal-backdrop');
+
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', () => this.closeModal(modalId));
+                }
+                if (backdrop) {
+                    backdrop.addEventListener('click', () => this.closeModal(modalId));
+                }
+            }
+        });
+        
+        // ESC 鍵關閉任何打開的模態窗口
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && modal.classList.contains('show')) {
-                this.closeModeInfo();
+            if (e.key === 'Escape') {
+                modals.forEach(modalId => {
+                    const modal = document.getElementById(modalId);
+                    if (modal && modal.classList.contains('show')) {
+                        this.closeModal(modalId);
+                    }
+                });
             }
         });
     }
 
-    showModeInfo() {
-        const modal = document.getElementById('mode-info-modal');
-        this.updateModeInfoContent();
-        modal.classList.add('show');
+    // 簡化的模態窗口顯示方法
+    showSimpleModal(title, content) {
+        console.log('📱 顯示簡化模態窗口:', title);
         
-        // Prevent body scroll when modal is open
-        document.body.style.overflow = 'hidden';
+        // 移除現有的模態窗口
+        const existingModal = document.querySelector('.simple-modal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+        
+        // 創建新的模態窗口
+        const modal = document.createElement('div');
+        modal.className = 'simple-modal';
+        modal.innerHTML = `
+            <div class="simple-modal-backdrop"></div>
+            <div class="simple-modal-content">
+                <div class="simple-modal-header">
+                    <h3>${title}</h3>
+                    <button class="simple-modal-close">&times;</button>
+                </div>
+                <div class="simple-modal-body">
+                    ${content}
+                </div>
+            </div>
+        `;
+        
+        // 添加樣式
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        `;
+        
+        // 添加到body
+        document.body.appendChild(modal);
+        
+        // 綁定關閉事件
+        const closeBtn = modal.querySelector('.simple-modal-close');
+        const backdrop = modal.querySelector('.simple-modal-backdrop');
+        
+        const closeModal = () => {
+            modal.style.opacity = '0';
+            setTimeout(() => {
+                if (modal.parentElement) {
+                    modal.remove();
+                }
+            }, 300);
+        };
+        
+        closeBtn.addEventListener('click', closeModal);
+        backdrop.addEventListener('click', closeModal);
+        
+        // ESC 鍵關閉
+        const handleEsc = (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+                document.removeEventListener('keydown', handleEsc);
+            }
+        };
+        document.addEventListener('keydown', handleEsc);
+        
+        console.log('✅ 簡化模態窗口已顯示');
+    }
+    
+    // 獲取主頁內容
+    getHomeContent() {
+        return `
+            <div class="info-content">
+                <h4>🌟 Key Features</h4>
+                <ul>
+                    <li><strong>Smart Scent Blending</strong> - Automatically adjusts fragrance based on different scenarios</li>
+                    <li><strong>Multi-Room Control</strong> - Independent settings for Living Room, Master Bedroom, and Second Bedroom</li>
+                    <li><strong>Device Integration</strong> - Connect diffusers, lights, and audio systems</li>
+                    <li><strong>Data Analytics</strong> - Track sleep quality and focus time</li>
+                </ul>
+                
+                <h4>📱 How to Use</h4>
+                <ul>
+                    <li><strong>Home Page</strong> - View current mode and device status</li>
+                    <li><strong>Mode Page</strong> - Switch between RELAX/FOCUS/ENERGIZE modes</li>
+                    <li><strong>Spatial Page</strong> - Control room devices and view 3D layout</li>
+                </ul>
+                
+                <h4>🎯 Smart Features</h4>
+                <ul>
+                    <li><strong>AI Optimization</strong> - Learns your preferences over time</li>
+                    <li><strong>Circadian Rhythm</strong> - Adapts to your daily schedule</li>
+                    <li><strong>Environmental Sensing</strong> - Responds to room conditions</li>
+                    <li><strong>Voice Control</strong> - Compatible with smart assistants</li>
+                </ul>
+            </div>
+        `;
+    }
+    
+    // 獲取模式內容
+    getModeContent() {
+        const mode = this.modes[this.currentMode];
+        const modeInfo = this.modeInfoData[this.currentMode];
+        
+        return `
+            <div class="info-content">
+                <h4>🧪 香調配方</h4>
+                <p><strong>${mode.blend}</strong></p>
+                
+                <h4>🎯 核心香調</h4>
+                <ul>
+                    ${modeInfo.coreScents.map(scent => 
+                        `<li><strong>${scent.name}</strong> - ${scent.effect}</li>`
+                    ).join('')}
+                </ul>
+                
+                <h4>⚙️ 智能調整</h4>
+                <ul>
+                    ${modeInfo.adjustments.map(adj => 
+                        `<li><strong>${adj.type} ${adj.ingredient}</strong> ${adj.change} - ${adj.reason}</li>`
+                    ).join('')}
+                </ul>
+                
+                <h4>📈 預期效果</h4>
+                <ul>
+                    ${modeInfo.benefits.map(benefit => 
+                        `<li><strong>${benefit.label}</strong>: <span style="color: #43E97B;">${benefit.value}</span></li>`
+                    ).join('')}
+                </ul>
+                
+                <h4>🤖 AI 分析</h4>
+                <p>${modeInfo.aiSummary}</p>
+            </div>
+        `;
+    }
+    
+    // 獲取空間內容
+    getSpatialContent() {
+        const activeDevices = Object.keys(this.devices).filter(device => this.devices[device]);
+        const currentRoom = this.rooms[this.currentRoom];
+        
+        return `
+            <div class="info-content">
+                <h4>🏠 Current Room</h4>
+                <p><strong>${currentRoom.name}</strong> ${currentRoom.icon}</p>
+                
+                <h4>🎮 Active Devices</h4>
+                <ul>
+                    ${activeDevices.length > 0 ? 
+                        activeDevices.map(device => {
+                            const icons = { diffuser: '🤖', lamp: '💡', speaker: '🔊' };
+                            const names = { diffuser: 'Smart Diffuser', lamp: 'Smart Light', speaker: 'Audio System' };
+                            return `<li>${icons[device]} ${names[device]} - Running</li>`;
+                        }).join('') : 
+                        '<li>No active devices currently</li>'
+                    }
+                </ul>
+                
+                <h4>🎵 Current Mode</h4>
+                <p><strong>${this.modes[this.currentMode].name}</strong></p>
+                <p>${this.modes[this.currentMode].blend}</p>
+                
+                <h4>📊 Room Analytics</h4>
+                <ul>
+                    <li><strong>Room Type</strong>: ${currentRoom.name}</li>
+                    <li><strong>Connected Devices</strong>: ${Object.keys(this.devices).length} units</li>
+                    <li><strong>Air Quality</strong>: Excellent</li>
+                    <li><strong>Optimal Scent Range</strong>: 15-20 minutes</li>
+                    <li><strong>Energy Efficiency</strong>: 94%</li>
+                </ul>
+                
+                <h4>🎛️ Quick Controls</h4>
+                <ul>
+                    <li><strong>Swipe Left/Right</strong>: Switch between rooms</li>
+                    <li><strong>Tap Devices</strong>: Toggle on/off</li>
+                    <li><strong>Navigation Dots</strong>: Jump to specific room</li>
+                    <li><strong>Room Label</strong>: Add new devices</li>
+                </ul>
+            </div>
+        `;
     }
 
+    // 舊版本的showModeInfo方法 - 現在使用showSimpleModal替代
+    showModeInfo() {
+        this.showSimpleModal('🎨 ' + this.modes[this.currentMode].name + ' 模式', this.getModeContent());
+    }
+    
+    // 舊版本的showHomeInfo方法 - 現在使用showSimpleModal替代  
+    showHomeInfo() {
+        this.showSimpleModal('🏠 ÔDÔRAI 應用指南', this.getHomeContent());
+    }
+
+    closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.remove('show');
+            document.body.style.overflow = '';
+            console.log(`✅ 模態窗口 ${modalId} 已關閉`);
+        }
+    }
+
+    // 保持向後兼容性
     closeModeInfo() {
-        const modal = document.getElementById('mode-info-modal');
-        modal.classList.remove('show');
-        
-        // Restore body scroll
-        document.body.style.overflow = '';
+        this.closeModal('mode-info-modal');
     }
 
     updateModeInfoContent() {
