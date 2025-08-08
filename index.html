@@ -16,6 +16,7 @@
             <div class="page active" id="home-page">
                 <!-- 頂部標題區 -->
                 <div class="header-section">
+                    <div class="current-mode-label">CURRENT MODE</div>
                     <img src="./assets/images/RELAX.png" alt="RELAX" class="main-title-img">
                     <div class="trigger-time">16:53 Trigger</div>
                     <div class="info-icon">i</div>
@@ -28,12 +29,12 @@
                 <div class="cards-container">
                     <!-- 左上照片 - prototype.png -->
                     <div class="photo-card card-top-left">
-                        <img src="./assets/images/prototype.png" alt="Prototype">
+                        <img src="./assets/images/prototype.png" alt="Prototype" id="raspberry-pi-1-img">
                     </div>
                     
                     <!-- 左下照片 - bub.png -->
                     <div class="photo-card card-bottom-left">
-                        <img src="./assets/images/bub.png" alt="Bub">
+                        <img src="./assets/images/bub.png" alt="Bub" id="raspberry-pi-2-img">
                     </div>
                     
                     <!-- 右側大照片 - lamp.png -->
@@ -48,18 +49,21 @@
                 <!-- i圖標 -->
                 <div class="info-icon">i</div>
                 
-                <!-- 粉紅色圓形 -->
-                <div class="pink-circle">
-                    <img src="./assets/images/relax_color.png" alt="Relax Color" class="circle-image">
-                </div>
-                
-                <!-- RELAX標題 -->
-                <div class="mode-title">
-                    <img src="./assets/images/RELAX.png" alt="RELAX" class="relax-title-img">
+                <!-- 可滑動的模式圖片區域 -->
+                <div class="mode-image-container">
+                    <!-- 粉紅色圓形 -->
+                    <div class="pink-circle">
+                        <img src="./assets/images/RELAX_COLOR.png" alt="Relax Color" class="circle-image">
+                    </div>
+                    
+                    <!-- RELAX標題 -->
+                    <div class="mode-title">
+                        <img src="./assets/images/RELAX.png" alt="RELAX" class="relax-title-img">
+                    </div>
                 </div>
                 
                 <!-- 香味描述 -->
-                <div class="scent-description">Lavender + Bergamot + Cedarwood</div>
+                <div class="scent-description">Oud Wood + Orange + Frankincense</div>
                 
                 <!-- 統計卡片 -->
                 <div class="stats-cards">
@@ -87,6 +91,15 @@
                         </div>
                     </div>
                 </div>
+                
+                <!-- 模式導航點 -->
+                <div class="mode-dots">
+                    <div class="nav-dot active"></div>
+                    <div class="nav-dot"></div>
+                    <div class="nav-dot"></div>
+                    <div class="nav-dot"></div>
+                    <div class="nav-dot"></div>
+                </div>
             </div>
 
             <!-- 第3頁 - 空間頁 -->
@@ -112,10 +125,10 @@
                     <div class="nav-dot"></div>
                 </div>
                 
-                <!-- Living Room 標籤 -->
+                <!-- 房間標籤 -->
                 <div class="room-label">
                     <span class="add-icon">+</span>
-                    <span class="room-name">Living Room</span>
+                    <span class="room-name">LIVING ROOM</span>
                 </div>
             </div>
 
@@ -124,13 +137,13 @@
         <!-- 底部導航 - 3個按鈕 -->
         <div class="bottom-nav">
             <div class="nav-item active" data-page="home-page">
-                <div class="nav-label">主頁</div>
+                <div class="nav-icon">⚫</div>
             </div>
             <div class="nav-item" data-page="mode-page">
-                <div class="nav-label">模式</div>
+                <div class="nav-icon">⚪</div>
             </div>
             <div class="nav-item" data-page="spatial-page">
-                <div class="nav-label">空間</div>
+                <div class="nav-icon">◐</div>
             </div>
         </div>
     </div>

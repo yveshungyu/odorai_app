@@ -3,7 +3,7 @@
 
 class OdoraiApp {
     constructor() {
-        this.currentMode = 'relax';
+        this.currentModeIndex = 0; // 當前模式索引 (0-4)
         this.currentPage = 'home-page';
         this.currentRoom = 'living'; // 新增: 當前房間狀態
         this.devices = {
@@ -14,9 +14,69 @@ class OdoraiApp {
         
         // 房間配置
         this.rooms = {
-            living: { name: 'Living Room', icon: '🏠', background: 'LivingRoom-bg.png' },
-            master: { name: 'Master Bedroom', icon: '🛏️', background: 'MasterBedroom-bg.png' },
-            second: { name: 'Second Bedroom', icon: '🛌', background: 'SecondBedroom-bg.png' }
+            living: { 
+                name: 'LIVING ROOM', 
+                icon: '🏠', 
+                background: 'LivingRoom-bg.png',
+                info: {
+                    title: '🏠 Living Room Space',
+                    description: 'The central hub of your home, designed for relaxation and social interaction.',
+                    features: [
+                        { name: 'Smart Lighting', status: 'Active', description: 'Adaptive lighting that adjusts to your mood and time of day' },
+                        { name: 'Aromatherapy System', status: 'Connected', description: 'Precision scent diffusion for optimal relaxation' },
+                        { name: 'Sound Environment', status: 'Optimized', description: 'Ambient soundscapes enhance your living experience' }
+                    ],
+                    currentSettings: {
+                        temperature: '22°C',
+                        humidity: '45%',
+                        airQuality: 'Excellent',
+                        lighting: 'Warm White (2700K)'
+                    },
+                    aiInsights: 'This space is optimized for evening relaxation. AI suggests increasing aromatherapy intensity by 15% for better stress relief based on your usage patterns.'
+                }
+            },
+            bedroom: { 
+                name: 'BEDROOM', 
+                icon: '🛏️', 
+                background: 'Bedroom-bg.png',
+                info: {
+                    title: '🛏️ Bedroom Sanctuary',
+                    description: 'Your personal sleep sanctuary, optimized for rest and recovery.',
+                    features: [
+                        { name: 'Sleep Optimization', status: 'Active', description: 'Advanced sleep tracking and environmental controls' },
+                        { name: 'Circadian Lighting', status: 'Synced', description: 'Light therapy that supports your natural sleep cycle' },
+                        { name: 'White Noise System', status: 'Calibrated', description: 'Personalized soundscapes for deeper sleep' }
+                    ],
+                    currentSettings: {
+                        temperature: '19°C',
+                        humidity: '50%',
+                        airQuality: 'Pure',
+                        lighting: 'Sleep Mode (1800K)'
+                    },
+                    aiInsights: 'Based on your sleep data, AI recommends lavender aromatherapy 30 minutes before your usual bedtime. Your sleep quality has improved 23% this week.'
+                }
+            },
+            studio: { 
+                name: 'STUDIO', 
+                icon: '🎨', 
+                background: 'Studio-bg.png',
+                info: {
+                    title: '🎨 Creative Studio',
+                    description: 'Your dedicated creative workspace, designed to inspire and enhance productivity.',
+                    features: [
+                        { name: 'Focus Enhancement', status: 'Optimized', description: 'Environmental controls to maximize concentration and creativity' },
+                        { name: 'Energy Boost System', status: 'Active', description: 'Invigorating scents and lighting for sustained creativity' },
+                        { name: 'Inspiration Mode', status: 'Enabled', description: 'Dynamic environment that adapts to your creative flow' }
+                    ],
+                    currentSettings: {
+                        temperature: '21°C',
+                        humidity: '40%',
+                        airQuality: 'Fresh',
+                        lighting: 'Daylight (5000K)'
+                    },
+                    aiInsights: 'Your most productive hours are 10 AM - 2 PM. AI suggests citrus aromatherapy during morning sessions for 35% better focus and peppermint for afternoon energy.'
+                }
+            }
         };
         
         // Device position configuration for each mode - 恢復原始正確位置
@@ -40,27 +100,137 @@ class OdoraiApp {
         
         this.positionEditMode = false;
         
+        this.autoSwitchTimer = null; // 自動切換計時器
+        this.autoSwitchChecker = null; // Safari兼容檢查器
+        this.AUTO_SWITCH_TIMEOUT = 1 * 60 * 1000; // 1分鐘自動切換
+        this.lastActiveTime = Date.now(); // 記錄最後活動時間
+        
         // 初始化氣味系統
         this.scentSystem = null;
         
-        this.modes = {
-            relax: {
+        // 5種模式配置
+        this.modes = [
+            {
+                id: 'relax',
                 name: 'RELAX',
-                blend: 'Jasmine + Lavender + Frankincense',
+                titleImage: 'RELAX.png',
+                circleImage: 'RELAX_COLOR.png',
+                blend: 'Oud Wood + Orange + Frankincense',
                 background: 'linear-gradient(135deg, #FF6B95 0%, #FFA726 100%)',
                 color: '#FF6B95'
             },
-            focus: {
+            {
+                id: 'focus',
                 name: 'FOCUS',
-                blend: 'Peppermint + Rosemary + Eucalyptus',
+                titleImage: 'FOCUS.png',
+                circleImage: 'FOCUS_COLOR.png',
+                blend: 'Jasmine + Eucalyptus + Peppermint',
                 background: 'linear-gradient(135deg, #4FACFE 0%, #00F2FE 100%)',
                 color: '#4FACFE'
             },
-            energize: {
-                name: 'ENERGIZE',
-                blend: 'Citrus + Ginger + Lemongrass',
+            {
+                id: 'sleep',
+                name: 'SLEEP',
+                titleImage: 'SLEEP.png',
+                circleImage: 'SLEEP_COLOR.png',
+                blend: 'Lavender + Chamomile + Juniper',
+                background: 'linear-gradient(135deg, #9C27B0 0%, #673AB7 100%)',
+                color: '#9C27B0'
+            },
+            {
+                id: 'fresh',
+                name: 'FRESH',
+                titleImage: 'FRESH.png',
+                circleImage: 'FRESH_COLOR.png',
+                blend: 'Lemon + Green Tea + Cypress',
                 background: 'linear-gradient(135deg, #43E97B 0%, #38F9D7 100%)',
                 color: '#43E97B'
+            },
+            {
+                id: 'happy',
+                name: 'HAPPY',
+                titleImage: 'HAPPY.png',
+                circleImage: 'HAPPY_COLOR.png',
+                blend: 'Orange Blossom + Freesia + Peach',
+                background: 'linear-gradient(135deg, #FFD54F 0%, #FF8A65 100%)',
+                color: '#FFD54F'
+            }
+        ];
+        
+        // Helper method: Get current mode
+        this.getCurrentMode = () => this.modes[this.currentModeIndex];
+        
+        // Mode detailed information data (English)
+        this.modeInfoData = {
+            relax: {
+                title: '🌙 RELAX Mode',
+                coreScents: [
+                    { name: 'Oud Wood', effect: 'Deep relaxation and mental tranquility' },
+                    { name: 'Orange', effect: 'Mood enhancement and stress relief' },
+                    { name: 'Frankincense', effect: 'Meditation and spiritual focus' }
+                ],
+                aiSummary: 'AI adjusts scent intensity based on your stress levels and time of day, enhancing Oud Wood ratio during evening hours to promote deep relaxation.',
+                benefits: [
+                    { label: 'Stress Relief', value: '85%' },
+                    { label: 'Sleep Quality', value: '78%' },
+                    { label: 'Inner Peace', value: '92%' }
+                ]
+            },
+            focus: {
+                title: '🎯 FOCUS Mode',
+                coreScents: [
+                    { name: 'Jasmine', effect: 'Enhanced attention and clear thinking' },
+                    { name: 'Eucalyptus', effect: 'Mental alertness and concentration boost' },
+                    { name: 'Peppermint', effect: 'Cognitive function and alertness stimulation' }
+                ],
+                aiSummary: 'AI intelligently detects your work patterns, intensifying Eucalyptus and Peppermint concentrations when high focus is needed.',
+                benefits: [
+                    { label: 'Concentration', value: '89%' },
+                    { label: 'Productivity', value: '76%' },
+                    { label: 'Creativity', value: '82%' }
+                ]
+            },
+            sleep: {
+                title: '😴 SLEEP Mode',
+                coreScents: [
+                    { name: 'Lavender', effect: 'Promotes deep sleep and relaxation' },
+                    { name: 'Chamomile', effect: 'Soothes nerves and reduces anxiety' },
+                    { name: 'Juniper', effect: 'Air purification and mental calm' }
+                ],
+                aiSummary: 'AI adjusts scent intensity based on your sleep cycle, starting diffusion 30 minutes before bedtime to ensure optimal sleep quality.',
+                benefits: [
+                    { label: 'Sleep Onset', value: '68%' },
+                    { label: 'Deep Sleep', value: '85%' },
+                    { label: 'Sleep Quality', value: '91%' }
+                ]
+            },
+            fresh: {
+                title: '🌿 FRESH Mode',
+                coreScents: [
+                    { name: 'Lemon', effect: 'Mental invigoration and air freshening' },
+                    { name: 'Green Tea', effect: 'Peaceful mindset and antioxidant benefits' },
+                    { name: 'Cypress', effect: 'Environmental purification and fatigue relief' }
+                ],
+                aiSummary: 'AI monitors air quality and automatically adjusts Lemon and Cypress ratios to maintain optimal freshness in your space.',
+                benefits: [
+                    { label: 'Air Freshness', value: '94%' },
+                    { label: 'Mental State', value: '87%' },
+                    { label: 'Environment Purification', value: '89%' }
+                ]
+            },
+            happy: {
+                title: '😊 HAPPY Mode',
+                coreScents: [
+                    { name: 'Orange Blossom', effect: 'Happiness boost and joyful mood' },
+                    { name: 'Freesia', effect: 'Positive emotions and energy enhancement' },
+                    { name: 'Peach', effect: 'Warm feelings and social comfort' }
+                ],
+                aiSummary: 'AI analyzes your emotional state and enhances Orange Blossom\'s sweet notes when needed to boost overall well-being.',
+                benefits: [
+                    { label: 'Happiness', value: '93%' },
+                    { label: 'Social Energy', value: '86%' },
+                    { label: 'Positive Emotions', value: '91%' }
+                ]
             }
         };
         
@@ -69,7 +239,7 @@ class OdoraiApp {
             sleep: {
                 time: '8hr 48m',
                 change: '+2.2%',
-                positive: false
+                positive: true
             },
             focus: {
                 time: '1hr 03m',
@@ -78,69 +248,11 @@ class OdoraiApp {
             }
         };
 
-        // 模式詳細信息數據
-        this.modeInfoData = {
-            relax: {
-                title: '🌙 RELAX Evening Mode',
-                coreScents: [
-                    { name: 'Lavender', effect: 'Deep relaxation and nerve calming' },
-                    { name: 'Bergamot', effect: 'Stress relief and emotional balance' },
-                    { name: 'Cedarwood', effect: 'Mental stability and sleep promotion' }
-                ],
-                adjustments: [
-                    { type: 'Enhance', ingredient: 'Lavender', change: '+15%', reason: 'Auto-adjusted based on ambient noise levels' },
-                    { type: 'Optimize', ingredient: 'Bergamot', change: '+8%', reason: 'Calibrated for evening hours' },
-                    { type: 'Balance', ingredient: 'Cedarwood', change: '±0%', reason: 'Maintaining baseline concentration' }
-                ],
-                aiSummary: 'Based on your sleep data and environmental sensors, AI recommends increasing Lavender concentration by 15% during evening hours for optimal relaxation. This formula has been proven to improve deep sleep time for 87% of users.',
-                benefits: [
-                    { label: 'Average Sleep Onset', value: '12 minutes faster' },
-                    { label: 'Deep Sleep Improvement', value: '+27%' },
-                    { label: 'Stress Level Reduction', value: '-34%' }
-                ]
-            },
-            focus: {
-                title: '🎯 FOCUS Productivity Mode',
-                coreScents: [
-                    { name: 'Peppermint', effect: 'Enhanced alertness and mental clarity' },
-                    { name: 'Rosemary', effect: 'Memory enhancement and cognitive function' },
-                    { name: 'Eucalyptus', effect: 'Air purification and mental freshness' }
-                ],
-                adjustments: [
-                    { type: 'Boost', ingredient: 'Peppermint', change: '+20%', reason: 'Optimized for work session duration' },
-                    { type: 'Elevate', ingredient: 'Rosemary', change: '+12%', reason: 'Based on focus time analytics' },
-                    { type: 'Stabilize', ingredient: 'Eucalyptus', change: '+5%', reason: 'Maintaining air quality' }
-                ],
-                aiSummary: 'AI analysis of your focus patterns suggests enhancing Peppermint and Rosemary during work hours, resulting in 43% longer focus duration and 28% reduction in distraction frequency.',
-                benefits: [
-                    { label: 'Extended Focus Time', value: '+43%' },
-                    { label: 'Work Efficiency Boost', value: '+31%' },
-                    { label: 'Distraction Reduction', value: '-28%' }
-                ]
-            },
-            energize: {
-                title: '⚡ ENERGIZE Morning Mode',
-                coreScents: [
-                    { name: 'Citrus Blend', effect: 'Mental stimulation and energy boost' },
-                    { name: 'Ginger', effect: 'Circulation enhancement and vitality' },
-                    { name: 'Lemongrass', effect: 'Mood elevation and positive energy' }
-                ],
-                adjustments: [
-                    { type: 'Activate', ingredient: 'Citrus', change: '+25%', reason: 'Morning awakening formula' },
-                    { type: 'Intensify', ingredient: 'Ginger', change: '+18%', reason: 'Physical vitality enhancement' },
-                    { type: 'Optimize', ingredient: 'Lemongrass', change: '+10%', reason: 'Sustained positive mood' }
-                ],
-                aiSummary: 'Morning energy formula optimized by AI, incorporating your circadian rhythm data. Use between 7-10 AM for best energizing effects, with energy boost lasting 4-6 hours.',
-                benefits: [
-                    { label: 'Energy Level Increase', value: '+52%' },
-                    { label: 'Morning Vitality Duration', value: '4-6 hours' },
-                    { label: 'Positive Mood Enhancement', value: '+38%' }
-                ]
-            }
-        };
+
         
         this.init();
         this.loadPositionsFromStorage();
+        this.setupWebSocket();
     }
     
     init() {
@@ -158,11 +270,18 @@ class OdoraiApp {
         this.updateUI();
         this.initScentSystem();
         
+        // 初始化模式顯示 - 延遲執行確保 DOM 完全加載
+        setTimeout(() => {
+            console.log('🚀 開始初始化模式顯示...');
+            this.updateModeDisplay();
+            this.updateModeDotsDisplay();
+        }, 100);
+        
         // 初始化時間顯示
         this.updateTriggerTime();
         
-        // 每3分鐘更新一次時間 (180000 ms)
-        setInterval(() => this.updateTriggerTime(), 180000);
+        // 每1分鐘更新一次時間 (60000 ms) - 改為實時更新
+        setInterval(() => this.updateTriggerTime(), 60000);
         
         // Simulate data updates every 30 seconds
         setInterval(() => this.updateStats(), 30000);
@@ -172,6 +291,8 @@ class OdoraiApp {
         // 延遲1秒後進行info-icon調試檢查
         setTimeout(() => {
             this.checkInfoIcons();
+            this.startAutoSwitchTimer(); // 啟動自動切換計時器
+            this.setupVisibilityHandler(); // 設置頁面可見性檢測
         }, 1000);
     }
     
@@ -196,6 +317,206 @@ class OdoraiApp {
         console.log('💡 Info-icon 功能已激活，點擊查看詳細信息');
     }
     
+    // ⏰ 自動切換模式系統
+    startAutoSwitchTimer() {
+        // 清除現有計時器
+        if (this.autoSwitchTimer) {
+            clearTimeout(this.autoSwitchTimer);
+        }
+        
+        // 清除現有的檢查間隔
+        if (this.autoSwitchChecker) {
+            clearInterval(this.autoSwitchChecker);
+        }
+        
+        // 更新最後活動時間
+        this.lastActiveTime = Date.now();
+        
+        console.log('⏰ 啟動自動切換計時器 - 1分鐘後自動切換模式（測試模式）');
+        console.log('📱 同時啟動Safari兼容檢查器');
+        
+        // 主要計時器
+        this.autoSwitchTimer = setTimeout(() => {
+            this.autoSwitchMode();
+        }, this.AUTO_SWITCH_TIMEOUT);
+        
+        // Safari兼容檢查器 - 每10秒檢查一次是否該切換了
+        this.autoSwitchChecker = setInterval(() => {
+            const now = Date.now();
+            const timePassed = now - this.lastActiveTime;
+            
+            if (timePassed >= this.AUTO_SWITCH_TIMEOUT) {
+                console.log('🍎 Safari檢查器觸發自動切換');
+                this.autoSwitchMode();
+            }
+        }, 10000); // 每10秒檢查一次
+    }
+    
+    // 🎲 執行自動模式切換
+    autoSwitchMode() {
+        // 從5個模式中隨機選擇一個
+        const randomIndex = Math.floor(Math.random() * this.modes.length);
+        const oldModeIndex = this.currentModeIndex;
+        const oldMode = this.getCurrentMode();
+        
+        console.log(`🎲 自動切換開始: 當前 ${oldMode.name} (索引${oldModeIndex}) -> 隨機選擇 ${this.modes[randomIndex].name} (索引${randomIndex})`);
+        
+        // 更新模式索引
+        this.currentModeIndex = randomIndex;
+        
+        // 獲取新模式信息
+        const newMode = this.getCurrentMode();
+        
+        console.log(`🔄 模式索引已更新: ${oldModeIndex} -> ${this.currentModeIndex}`);
+        console.log(`📝 模式名稱: ${oldMode.name} -> ${newMode.name}`);
+        
+        // 更新顯示
+        console.log('🖼️ 開始更新模式顯示...');
+        this.updateModeDisplay();
+        this.updateModeDotsDisplay();
+        console.log('✅ 模式顯示更新完成');
+        
+        // 判斷是否實際改變了模式
+        if (randomIndex === oldModeIndex) {
+            console.log(`🎯 隨機選中相同模式 ${newMode.name}，視覺上不會變化`);
+        } else {
+            console.log(`✅ 成功切換模式: ${oldMode.name} -> ${newMode.name}`);
+            // 顯示自動切換通知
+            this.showAutoSwitchNotification(oldMode.name, newMode.name);
+        }
+        
+        // 清除檢查器（避免重複觸發）
+        if (this.autoSwitchChecker) {
+            clearInterval(this.autoSwitchChecker);
+            this.autoSwitchChecker = null;
+        }
+        
+        // 重新啟動計時器
+        console.log('⏰ 重新啟動自動切換計時器...');
+        this.startAutoSwitchTimer();
+    }
+    
+    // 📝 顯示自動切換通知
+    showAutoSwitchNotification(fromMode, toMode) {
+        if (fromMode === toMode) {
+            // 相同模式不顯示通知，保持安靜
+            return;
+        }
+        
+        const notification = document.createElement('div');
+        notification.className = 'auto-switch-notification';
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            font-size: 14px;
+            font-family: 'NCTTorin Regular', sans-serif;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        `;
+        notification.textContent = `🤖 AI Auto-Switch: ${fromMode} → ${toMode}`;
+        
+        document.body.appendChild(notification);
+        
+        // 顯示動畫
+        setTimeout(() => {
+            notification.style.opacity = '1';
+            notification.style.transform = 'translateX(-50%) translateY(0)';
+        }, 100);
+        
+        // 3秒後消失
+        setTimeout(() => {
+            notification.style.opacity = '0';
+            notification.style.transform = 'translateX(-50%) translateY(-20px)';
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    document.body.removeChild(notification);
+                }
+            }, 300);
+        }, 3000);
+    }
+    
+    // 🔄 重置自動切換計時器（用於手動切換時）
+    resetAutoSwitchTimer() {
+        console.log('🔄 檢測到手動切換，重置自動切換計時器');
+        
+        // 清除現有計時器和檢查器
+        if (this.autoSwitchTimer) {
+            clearTimeout(this.autoSwitchTimer);
+            this.autoSwitchTimer = null;
+        }
+        if (this.autoSwitchChecker) {
+            clearInterval(this.autoSwitchChecker);
+            this.autoSwitchChecker = null;
+        }
+        
+        this.startAutoSwitchTimer();
+    }
+    
+    // 📱 設置頁面可見性檢測（解決 iPad Safari 背景暫停問題）
+    setupVisibilityHandler() {
+        // 檢查瀏覽器支援的 Page Visibility API
+        let hidden, visibilityChange;
+        if (typeof document.hidden !== "undefined") {
+            hidden = "hidden";
+            visibilityChange = "visibilitychange";
+        } else if (typeof document.webkitHidden !== "undefined") {
+            hidden = "webkitHidden";
+            visibilityChange = "webkitvisibilitychange";
+        }
+        
+        if (!visibilityChange) {
+            console.warn('⚠️ 此瀏覽器不支援 Page Visibility API');
+            return;
+        }
+        
+        const handleVisibilityChange = () => {
+            if (document[hidden]) {
+                // 頁面隱藏（背景、螢幕關閉等）
+                console.log('📱 頁面進入背景，記錄當前時間');
+                // 不清除計時器，而是記錄時間
+            } else {
+                // 頁面重新可見
+                console.log('📱 頁面重新可見，檢查是否需要執行自動切換');
+                
+                const now = Date.now();
+                const timePassed = now - this.lastActiveTime;
+                
+                if (timePassed >= this.AUTO_SWITCH_TIMEOUT) {
+                    // 已經超過1分鐘，立即執行自動切換
+                    console.log(`📱 離開時間 ${Math.round(timePassed / 1000)}秒，立即執行自動切換`);
+                    this.autoSwitchMode();
+                } else {
+                    // 重新啟動計時器，剩餘時間
+                    const remainingTime = this.AUTO_SWITCH_TIMEOUT - timePassed;
+                    console.log(`📱 重新啟動計時器，剩餘 ${Math.round(remainingTime / 1000)}秒`);
+                    
+                    if (this.autoSwitchTimer) {
+                        clearTimeout(this.autoSwitchTimer);
+                    }
+                    
+                    this.autoSwitchTimer = setTimeout(() => {
+                        this.autoSwitchMode();
+                    }, remainingTime);
+                }
+            }
+        };
+        
+        document.addEventListener(visibilityChange, handleVisibilityChange, false);
+        console.log('📱 頁面可見性檢測已啟用，支援 iPad Safari 背景恢復');
+    }
+    
+
+    
     setupEventListeners() {
         // Bottom navigation - Made more robust
         document.querySelectorAll('.nav-item[data-page]').forEach(item => {
@@ -216,22 +537,25 @@ class OdoraiApp {
         });
         
         // Mode switching (click on mode title)
-        document.getElementById('home-mode-title').addEventListener('click', () => {
+        /* document.getElementById('home-mode-title').addEventListener('click', () => {
             this.cycleModes();
-        });
+        }); */
         
 
         
         // Mode-page swipe for mode switching only
         this.setupModePageSwipe();
         
+        // Mode-page dots click
+        this.setupModeDotsClick();
+        
         // Spatial-page swipe for room switching
         this.setupSpatialPageSwipe();
         
         // Add device button
-        document.querySelector('.add-device-btn').addEventListener('click', () => {
+        /* document.querySelector('.add-device-btn').addEventListener('click', () => {
             this.showAddDeviceDialog();
-        });
+        }); */
         
         // Touch gestures for mobile - 移除頁面間滑動，只保留頁面內滑動
         // this.setupTouchGestures();
@@ -239,8 +563,43 @@ class OdoraiApp {
         // Add resize listener to keep scent points in sync
         window.addEventListener('resize', () => this.syncScentDevicePositions());
         
-        // Spatial page interactions
-        this.setupSpatialPageInteractions();
+        // Info icons - Using event delegation for efficiency
+        document.body.addEventListener('click', (event) => {
+            const infoIcon = event.target.closest('.info-icon');
+            if (infoIcon) {
+                const parentPage = infoIcon.closest('.page');
+                if (parentPage) {
+                    switch (parentPage.id) {
+                        case 'home-page':
+                            this.showHomeInfo();
+                            break;
+                        case 'mode-page':
+                            this.showModeInfo();
+                            break;
+                        case 'spatial-page':
+                            this.showSpatialInfo();
+                            break;
+                    }
+                }
+            }
+        });
+
+        // Spatial page interactions (original code was broader, now more specific)
+        document.getElementById('spatial-page').addEventListener('click', (e) => {
+            const addPoint = e.target.closest('.add-point');
+            if (addPoint) {
+                this.showAddDeviceAtPoint(addPoint);
+            }
+            
+            const roomDevice = e.target.closest('.room-device');
+            if (roomDevice) {
+                const deviceType = roomDevice.dataset.device;
+                if (deviceType) {
+                    this.toggleDevice(deviceType);
+                    this.showSpatialDeviceAnimation(roomDevice);
+                }
+            }
+        });
     }
     
     setupTouchGestures() {
@@ -285,16 +644,18 @@ class OdoraiApp {
     }
     
     setupModePageSwipe() {
-        const modePage = document.getElementById('mode-page');
-        if (!modePage) return;
+        const modeImageContainer = document.querySelector('.mode-image-container');
+        if (!modeImageContainer) return;
         let startX = null;
         let startY = null;
-        modePage.addEventListener('touchstart', (e) => {
+        
+        modeImageContainer.addEventListener('touchstart', (e) => {
             if (e.touches.length > 1) return;
             startX = e.touches[0].clientX;
             startY = e.touches[0].clientY;
         }, { passive: true });
-        modePage.addEventListener('touchend', (e) => {
+        
+        modeImageContainer.addEventListener('touchend', (e) => {
             if (startX === null) return;
             const endX = e.changedTouches[0].clientX;
             const endY = e.changedTouches[0].clientY;
@@ -302,11 +663,16 @@ class OdoraiApp {
             const diffY = startY - endY;
             // 只偵測水平滑動且距離夠大
             if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+                console.log(`👆 偵測到滑動: diffX=${diffX}, diffY=${diffY}`);
                 if (diffX > 0) {
+                    console.log('➡️ 向右滑動 - 切換到下一個模式');
                     this.animateModeSwitch('next');
                 } else {
+                    console.log('⬅️ 向左滑動 - 切換到上一個模式');
                     this.animateModeSwitch('prev');
                 }
+            } else {
+                console.log(`❌ 滑動距離不足或非水平滑動: diffX=${diffX}, diffY=${diffY}`);
             }
             startX = null;
             startY = null;
@@ -346,58 +712,163 @@ class OdoraiApp {
     }
 
     animateModeSwitch(direction) {
-        const wrapper = document.querySelector('.mode-circle-wrapper');
-        const oldCircle = wrapper.querySelector('.mode-circle');
-        if (!oldCircle) return;
-        // 計算新 mode
-        const modeKeys = Object.keys(this.modes);
-        const currentIndex = modeKeys.indexOf(this.currentMode);
+        // 計算新模式索引
         let newIndex;
         if (direction === 'next') {
-            newIndex = (currentIndex + 1) % modeKeys.length;
+            newIndex = (this.currentModeIndex + 1) % this.modes.length;
         } else {
-            newIndex = (currentIndex - 1 + modeKeys.length) % modeKeys.length;
+            newIndex = (this.currentModeIndex - 1 + this.modes.length) % this.modes.length;
         }
-        const newMode = modeKeys[newIndex];
         
-        // dots 動畫
+        // 更新當前模式索引
+        this.currentModeIndex = newIndex;
+        
+        // 更新模式顯示
+        this.updateModeDisplay();
+        
+        // 更新導航點
+        this.updateModeDotsDisplay();
+        
+        // 🔄 重置自動切換計時器（手動切換）
+        this.resetAutoSwitchTimer();
+        
+        console.log(`切換到模式: ${this.getCurrentMode().name} (${newIndex + 1}/${this.modes.length})`);
+    }
+    
+    // 快速修復方案 - 替換 updateModeDisplay 函數
+    updateModeDisplay() {
+        const currentMode = this.getCurrentMode();
+        console.log(`🔄 更新模式顯示: ${currentMode.name}`);
+        
+        // 方法1: 直接設置 HTML 確保圖片載入
+        const modeImageContainer = document.querySelector('.mode-image-container');
+        if (modeImageContainer) {
+            // 重新創建圖片元素
+            modeImageContainer.innerHTML = `
+                <div class="pink-circle">
+                    <img src="./assets/images/${currentMode.circleImage}" 
+                         alt="${currentMode.name} Color" 
+                         class="circle-image"
+                         onload="console.log('圖片載入成功: ${currentMode.circleImage}')"
+                         onerror="console.error('圖片載入失敗: ${currentMode.circleImage}'); this.src='./assets/images/default.png';">
+                </div>
+                <div class="mode-title">
+                    <img src="./assets/images/${currentMode.titleImage}" 
+                         alt="${currentMode.name}" 
+                         class="relax-title-img"
+                         onload="console.log('標題圖片載入成功: ${currentMode.titleImage}')"
+                         onerror="console.error('標題圖片載入失敗: ${currentMode.titleImage}');">
+                </div>
+            `;
+        }
+        
+        // 更新香味描述
+        const scentDesc = document.querySelector('.scent-description');
+        if (scentDesc) {
+            scentDesc.textContent = currentMode.blend;
+        }
+        
+        // 🔄 同步更新 HOME PAGE 的主標題圖片
+        this.syncHomePageTitle();
+    }
+    
+
+    // 🏠 同步 HOME PAGE 標題圖片函數
+    syncHomePageTitle() {
+        const currentMode = this.getCurrentMode();
+        const homePageTitleImg = document.querySelector('#home-page .main-title-img');
+        
+        if (homePageTitleImg) {
+            const oldSrc = homePageTitleImg.src;
+            const newSrc = `./assets/images/${currentMode.titleImage}`;
+            
+            if (oldSrc !== newSrc) {
+                homePageTitleImg.src = newSrc;
+                homePageTitleImg.alt = currentMode.name;
+                
+                console.log(`🏠 HOME PAGE 標題圖片已同步: ${currentMode.name} -> ${currentMode.titleImage}`);
+                
+                // 添加載入狀態監控
+                homePageTitleImg.onload = () => {
+                    console.log(`✅ HOME PAGE 圖片載入成功: ${currentMode.titleImage}`);
+                };
+                homePageTitleImg.onerror = () => {
+                    console.error(`❌ HOME PAGE 圖片載入失敗: ${currentMode.titleImage}`);
+                };
+            }
+        } else {
+            console.warn('⚠️ 找不到 HOME PAGE 的主標題圖片元素');
+        }
+    }
+
+    // 方法2: 使用 CSS background-image 作為後備方案
+    updateModeDisplayWithBackground() {
+        const currentMode = this.getCurrentMode();
+        
+        // 設置圓形背景
+        const pinkCircle = document.querySelector('.pink-circle');
+        if (pinkCircle) {
+            // 移除 img 元素，使用 div 的背景圖片
+            pinkCircle.innerHTML = '';
+            pinkCircle.style.width = '445px';
+            pinkCircle.style.height = '445px';
+            pinkCircle.style.borderRadius = '50%';
+            pinkCircle.style.backgroundImage = `url('./assets/images/${currentMode.circleImage}')`;
+            pinkCircle.style.backgroundSize = 'cover';
+            pinkCircle.style.backgroundPosition = 'center';
+            pinkCircle.style.backgroundRepeat = 'no-repeat';
+            
+            console.log(`使用背景圖片: ./assets/images/${currentMode.circleImage}`);
+        }
+        
+        // 更新模式標題圖片
+        const titleImg = document.querySelector('.relax-title-img');
+        if (titleImg) {
+            titleImg.src = `./assets/images/${currentMode.titleImage}`;
+            titleImg.alt = currentMode.name;
+        }
+        
+        // 更新香味描述
+        const scentDesc = document.querySelector('.scent-description');
+        if (scentDesc) {
+            scentDesc.textContent = currentMode.blend;
+        }
+    }
+    
+    // 更新模式導航點顯示
+    updateModeDotsDisplay() {
         const modeDots = document.querySelector('.mode-dots');
         if (modeDots) {
-            const dots = Array.from(modeDots.children);
-            dots.forEach(dot => dot.classList.remove('middle'));
-            dots[newIndex].classList.add('middle'); // 根據新模式設置正確的點
-            
-            // 導航點滑動動畫
-            modeDots.classList.remove('slide-left', 'slide-right');
-            modeDots.classList.add(direction === 'next' ? 'slide-left' : 'slide-right');
+            const dots = modeDots.querySelectorAll('.nav-dot');
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === this.currentModeIndex);
+            });
         }
-        // 建立新圓形
-        const newCircle = document.createElement('div');
-        newCircle.className = 'mode-circle ' + (direction === 'next' ? 'slide-in-right' : 'slide-in-left');
-        // 設定新圓形純色
-        const modeColors = {
-            relax: '#FF6B95',
-            focus: '#4FACFE',
-            energize: '#43E97B'
-        };
-        newCircle.style.backgroundColor = modeColors[newMode];
-        newCircle.style.backgroundImage = '';
-        // 插入新圓形
-        wrapper.appendChild(newCircle);
-        // 舊圓形加滑出動畫
-        oldCircle.classList.remove('slide-in-left', 'slide-in-right', 'slide-out-left', 'slide-out-right');
-        oldCircle.classList.add(direction === 'next' ? 'slide-out-left' : 'slide-out-right');
-        // 動畫結束後，切換 mode、移除舊圓形、移除新圓形動畫 class
-        setTimeout(() => {
-            this.currentMode = newMode;
-            // dots 結構在動畫結束後才重設
-            this.updateUI();
-            wrapper.removeChild(oldCircle);
-            newCircle.classList.remove('slide-in-left', 'slide-in-right');
-            if (modeDots) {
-                modeDots.classList.remove('slide-left', 'slide-right');
-            }
-        }, 400);
+    }
+    
+    // 設置模式導航點點擊事件
+    setupModeDotsClick() {
+        const modeDots = document.querySelector('.mode-dots');
+        if (modeDots) {
+            modeDots.addEventListener('click', (e) => {
+                const clickedDot = e.target.closest('.nav-dot');
+                if (clickedDot) {
+                    const dots = Array.from(modeDots.querySelectorAll('.nav-dot'));
+                    const clickedIndex = dots.indexOf(clickedDot);
+                    
+                    if (clickedIndex !== -1 && clickedIndex !== this.currentModeIndex) {
+                        this.currentModeIndex = clickedIndex;
+                        this.updateModeDisplay(); // 這裡已經包含了 syncHomePageTitle()
+                        this.updateModeDotsDisplay();
+                        
+                        // 🔄 重置自動切換計時器（手動點擊切換）
+                        this.resetAutoSwitchTimer();
+                        
+                        console.log(`點擊切換到模式: ${this.getCurrentMode().name} (${clickedIndex + 1}/${this.modes.length})`);
+                    }
+                }
+            });
+        }
     }
 
     animateRoomSwitch(direction) {
@@ -449,26 +920,26 @@ class OdoraiApp {
     updateRoomUI() {
         const room = this.rooms[this.currentRoom];
         
-        // 更新房間標籤
-        const roomLabel = document.querySelector('.room-label span');
-        const roomIcon = document.querySelector('.room-icon');
-        if (roomLabel) roomLabel.textContent = room.name;
-        if (roomIcon) roomIcon.textContent = room.icon;
+        // 更新房間標籤文字
+        const roomNameElement = document.querySelector('#spatial-page .room-name');
+        if (roomNameElement) {
+            roomNameElement.textContent = room.name;
+        }
         
         // 更新背景圖片
-        const roomBackground = document.querySelector('.room-background');
-        if (roomBackground) {
-            roomBackground.style.backgroundImage = `url('./assets/images/${room.background}')`;
+        const roomImage = document.querySelector('.room-image');
+        if (roomImage) {
+            roomImage.src = `./assets/images/${room.background}`;
         }
         
         // 更新房間導航點
-        const roomDots = document.querySelector('.room-dots');
+        const roomDots = document.querySelector('#spatial-page .room-dots');
         if (roomDots) {
             const roomKeys = Object.keys(this.rooms);
             const currentIndex = roomKeys.indexOf(this.currentRoom);
             const dots = Array.from(roomDots.children);
             dots.forEach((dot, index) => {
-                dot.classList.toggle('middle', index === currentIndex);
+                dot.classList.toggle('active', index === currentIndex);
             });
         }
         
@@ -627,8 +1098,9 @@ class OdoraiApp {
                 const bottom = device.style.bottom;
                 
                 // Auto-save to internal configuration
-                if (!this.devicePositions[this.currentMode]) {
-                    this.devicePositions[this.currentMode] = {};
+                const currentModeId = this.getCurrentMode().id;
+                if (!this.devicePositions[currentModeId]) {
+                    this.devicePositions[currentModeId] = {};
                 }
                 
                 // Convert right positioning to left if needed
@@ -636,20 +1108,20 @@ class OdoraiApp {
                 const container = device.parentElement.getBoundingClientRect();
                 
                 if (left) {
-                    this.devicePositions[this.currentMode][deviceType] = {
+                    this.devicePositions[currentModeId][deviceType] = {
                         bottom: bottom,
                         left: left
                     };
                 } else {
                     const rightValue = container.width - rect.right + container.left;
-                    this.devicePositions[this.currentMode][deviceType] = {
+                    this.devicePositions[currentModeId][deviceType] = {
                         bottom: bottom,
                         right: `${rightValue}px`
                     };
                 }
                 
                 console.log(`✅ ${deviceType} 位置已保存: left: ${left}, bottom: ${bottom}`);
-                console.log(`CSS 設定: .${this.currentMode}-mode .device-icon.${deviceType} { bottom: ${bottom}; left: ${left}; }`);
+                console.log(`CSS 設定: .${currentModeId}-mode .device-icon.${deviceType} { bottom: ${bottom}; left: ${left}; }`);
                 
                 // Store in localStorage for persistence
                 this.savePositionsToStorage();
@@ -849,16 +1321,16 @@ class OdoraiApp {
     }
     
     cycleModes() {
-        const modeKeys = Object.keys(this.modes);
-        const currentIndex = modeKeys.indexOf(this.currentMode);
-        const nextIndex = (currentIndex + 1) % modeKeys.length;
-        this.currentMode = modeKeys[nextIndex];
+        const nextIndex = (this.currentModeIndex + 1) % this.modes.length;
+        this.currentModeIndex = nextIndex;
         this.updateUI();
+        this.updateModeDisplay();
+        this.updateModeDotsDisplay();
         this.triggerModeAnimation();
     }
     
     updateUI() {
-        const mode = this.modes[this.currentMode];
+        const mode = this.getCurrentMode();
         
         // Update home page
         const homePage = document.querySelector('.home-page');
@@ -870,7 +1342,7 @@ class OdoraiApp {
             // This line was incorrectly making the home page active during any mode change.
             // It has been removed to fix the page switching bug.
             // homePage.className = 'page home-page active';
-            console.log(`UI updated for mode: ${this.currentMode}`);
+            console.log(`UI updated for mode: ${mode.name}`);
         }
         
         if (modeTitle) modeTitle.textContent = mode.name;
@@ -933,9 +1405,13 @@ class OdoraiApp {
         const minutes = String(now.getMinutes()).padStart(2, '0');
         const timeString = `${hours}:${minutes}`;
 
-        const triggerTime = document.getElementById('trigger-time');
+        // 修正選擇器 - HTML 中使用的是 class 而不是 id
+        const triggerTime = document.querySelector('.trigger-time');
         if (triggerTime) {
             triggerTime.textContent = `${timeString} Trigger`;
+            console.log(`🕐 時間已更新: ${timeString} Trigger`);
+        } else {
+            console.warn('⚠️ 找不到 .trigger-time 元素');
         }
     }
     
@@ -950,14 +1426,14 @@ class OdoraiApp {
         
         if (sleepElement) {
             sleepElement.innerHTML = `
-                <span class="change-indicator ${this.stats.sleep.positive ? 'positive' : ''}">${this.stats.sleep.change}</span>
+                <span class="change-indicator">${this.stats.sleep.change}</span>
                 <span class="time-value">${this.stats.sleep.time}</span>
             `;
         }
         
         if (focusElement) {
             focusElement.innerHTML = `
-                <span class="change-indicator ${this.stats.focus.positive ? 'positive' : ''}">${this.stats.focus.change}</span>
+                <span class.change-indicator">${this.stats.focus.change}</span>
                 <span class="time-value">${this.stats.focus.time}</span>
             `;
         }
@@ -995,15 +1471,12 @@ class OdoraiApp {
     }
     
     animatePageTransition(pageId) {
+        // 禁用頁面切換動畫，直接顯示頁面
         const page = document.getElementById(pageId);
         if (page) {
-            page.style.transform = 'translateX(20px)';
-            page.style.opacity = '0';
-            
-            setTimeout(() => {
-                page.style.transform = 'translateX(0)';
-                page.style.opacity = '1';
-            }, 100);
+            // 不執行任何動畫，直接確保頁面可見
+            page.style.transform = 'none';
+            page.style.opacity = '1';
         }
     }
     
@@ -1040,38 +1513,6 @@ class OdoraiApp {
         if (roomBackground) {
             roomBackground.className = `room-background mode-${this.currentMode}`;
         }
-    }
-    
-    setupSpatialPageInteractions() {
-        // Initialize room UI
-        this.updateRoomUI();
-        
-        // Room device interactions
-        document.addEventListener('click', (e) => {
-            const roomDevice = e.target.closest('.room-device');
-            if (roomDevice) {
-                const deviceType = roomDevice.dataset.device;
-                if (deviceType) {
-                    this.toggleDevice(deviceType);
-                    this.showSpatialDeviceAnimation(roomDevice);
-                }
-            }
-        });
-        
-        // Add point interactions
-        document.addEventListener('click', (e) => {
-            const addPoint = e.target.closest('.add-point');
-            if (addPoint) {
-                this.showAddDeviceAtPoint(addPoint);
-            }
-        });
-        
-        // Info icon in spatial header
-        document.addEventListener('click', (e) => {
-            if (e.target.closest('.spatial-header .info-icon')) {
-                this.showSpatialInfo();
-            }
-        });
     }
     
     showSpatialDeviceAnimation(deviceElement) {
@@ -1178,56 +1619,197 @@ class OdoraiApp {
     }
     
     showSpatialInfo() {
+        // 獲取當前房間的資訊
+        const currentRoom = this.rooms[this.currentRoom];
+        if (!currentRoom || !currentRoom.info) {
+            console.error('找不到當前房間的資訊:', this.currentRoom);
+            return;
+        }
+        
+        const roomInfo = currentRoom.info;
+        
         const infoDialog = document.createElement('div');
         infoDialog.className = 'spatial-info-dialog';
         infoDialog.style.cssText = `
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(255, 255, 255, 0.95);
-            padding: 30px;
-            border-radius: 20px;
-            backdrop-filter: blur(20px);
-            z-index: 3000;
-            text-align: center;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 320px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(30, 30, 30, 0.95); color: white; padding: 25px; border-radius: 20px;
+            backdrop-filter: blur(20px); z-index: 3000; text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4); max-width: 420px; max-height: 80vh;
+            border: 1px solid rgba(255, 255, 255, 0.2); overflow-y: auto;
         `;
         
-        infoDialog.innerHTML = `
-            <h3 style="margin-bottom: 15px; color: #333; font-size: 18px;">🏠 Living Room Setup</h3>
-            <div style="text-align: left; margin-bottom: 20px; color: #666; font-size: 14px; line-height: 1.6;">
-                <p><strong>Active Devices:</strong></p>
-                <ul style="margin: 10px 0; padding-left: 20px;">
-                    <li>💜 Lavender Diffuser (Relaxation)</li>
-                    <li>🍊 Citrus Speaker (Energy)</li>
-                    <li>🌿 Eucalyptus Lamp (Focus)</li>
-                </ul>
-                <p><strong>Current Mode:</strong> ${this.modes[this.currentMode].name}</p>
-                <p><strong>Room Size:</strong> 24m² / 258ft²</p>
+        // 生成功能列表
+        const featuresHtml = roomInfo.features.map(feature => `
+            <div style="margin: 12px 0; padding: 10px; background: rgba(255, 255, 255, 0.05); border-radius: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                    <span style="font-weight: 600; color: #fff;">${feature.name}</span>
+                    <span style="font-size: 12px; padding: 3px 8px; background: rgba(76, 175, 80, 0.3); color: #4CAF50; border-radius: 12px;">${feature.status}</span>
+                </div>
+                <p style="font-size: 13px; color: #ccc; margin: 0; line-height: 1.4;">${feature.description}</p>
             </div>
+        `).join('');
+        
+        // 生成環境設定
+        const settingsHtml = Object.entries(roomInfo.currentSettings).map(([key, value]) => `
+            <div style="display: flex; justify-content: space-between; margin: 8px 0; font-size: 14px;">
+                <span style="color: #ccc; text-transform: capitalize;">${key.replace(/([A-Z])/g, ' $1')}:</span>
+                <span style="color: #fff; font-weight: 500;">${value}</span>
+            </div>
+        `).join('');
+        
+        infoDialog.innerHTML = `
+            <h3 style="margin-bottom: 15px; font-size: 20px; font-weight: 600; color: #fff;">${roomInfo.title}</h3>
+            
+            <div style="text-align: left; margin-bottom: 20px;">
+                <p style="color: #ddd; font-size: 15px; line-height: 1.5; margin-bottom: 15px;">${roomInfo.description}</p>
+                
+                <h4 style="color: #fff; font-size: 16px; margin: 15px 0 10px 0; display: flex; align-items: center;">
+                    <span style="margin-right: 8px;">🔧</span>Smart Features
+                </h4>
+                ${featuresHtml}
+                
+                <h4 style="color: #fff; font-size: 16px; margin: 20px 0 10px 0; display: flex; align-items: center;">
+                    <span style="margin-right: 8px;">📊</span>Current Environment
+                </h4>
+                <div style="background: rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 10px;">
+                    ${settingsHtml}
+                </div>
+                
+                <h4 style="color: #fff; font-size: 16px; margin: 20px 0 10px 0; display: flex; align-items: center;">
+                    <span style="margin-right: 8px;">🤖</span>AI Insights
+                </h4>
+                <div style="background: rgba(33, 150, 243, 0.1); border-left: 3px solid #2196F3; padding: 12px; border-radius: 0 8px 8px 0;">
+                    <p style="color: #e3f2fd; font-size: 14px; line-height: 1.5; margin: 0;">${roomInfo.aiInsights}</p>
+                </div>
+            </div>
+            
             <button onclick="this.closest('.spatial-info-dialog').remove()" style="
-                background: linear-gradient(135deg, #FF6B95 0%, #FFA726 100%);
-                color: white;
-                border: none;
-                padding: 12px 24px;
-                border-radius: 25px;
-                font-weight: 600;
-                cursor: pointer;
-                font-size: 14px;
-            ">Got it</button>
+                background: rgba(255, 255, 255, 0.2); color: white; border: none; padding: 12px 24px;
+                border-radius: 25px; font-weight: 600; cursor: pointer; font-size: 14px;
+                transition: background 0.3s ease;
+            " onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'" 
+               onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'">Close</button>
         `;
         
         document.body.appendChild(infoDialog);
+    }
+
+    showHomeInfo() {
+        const infoDialog = document.createElement('div');
+        infoDialog.className = 'spatial-info-dialog'; // Re-use existing class for styling
+        infoDialog.style.cssText = `
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(30, 30, 30, 0.9); color: white; padding: 30px; border-radius: 20px;
+            backdrop-filter: blur(20px); z-index: 3000; text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); max-width: 380px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        `;
         
-        // Auto-remove after 10 seconds
-        setTimeout(() => {
-            if (infoDialog.parentElement) {
-                infoDialog.remove();
-            }
-        }, 10000);
+        infoDialog.innerHTML = `
+            <h3 style="margin-bottom: 15px; font-size: 20px; font-weight: 600;">ÔDÔRAI Home Dashboard</h3>
+            <div style="text-align: left; margin-bottom: 20px; font-size: 15px; line-height: 1.6; opacity: 0.9;">
+                <p>This is a real-time overview of your current space.</p>
+                <ul style="margin: 15px 0; padding-left: 20px; list-style: '✨';">
+                    <li style="padding-left: 10px;"><strong>Room Tag:</strong> Displays the currently detected primary activity space.</li>
+                    <li style="padding-left: 10px;"><strong>Device Cards:</strong> Visually represent your connected smart devices.</li>
+                    <li style="padding-left: 10px;"><strong>Trigger Time:</strong> Records the last time a mode was triggered by AI or manually.</li>
+                </ul>
+                <p>You can switch to different pages using the bottom navigation bar.</p>
+            </div>
+            <button onclick="this.closest('.spatial-info-dialog').remove()" style="
+                background: rgba(255, 255, 255, 0.2); color: white; border: none; padding: 12px 24px;
+                border-radius: 25px; font-weight: 600; cursor: pointer; font-size: 14px;
+            ">Close</button>
+        `;
+        document.body.appendChild(infoDialog);
+    }
+
+
+
+    showHomeInfo() {
+        const infoDialog = document.createElement('div');
+        infoDialog.className = 'spatial-info-dialog'; // Re-use existing class for styling
+        infoDialog.style.cssText = `
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(30, 30, 30, 0.9); color: white; padding: 30px; border-radius: 20px;
+            backdrop-filter: blur(20px); z-index: 3000; text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); max-width: 380px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        `;
+        
+        infoDialog.innerHTML = `
+            <h3 style="margin-bottom: 15px; font-size: 20px; font-weight: 600;">ÔDÔRAI Home Dashboard</h3>
+            <div style="text-align: left; margin-bottom: 20px; font-size: 15px; line-height: 1.6; opacity: 0.9;">
+                <p>This is a real-time overview of your current space.</p>
+                <ul style="margin: 15px 0; padding-left: 20px; list-style: '✨';">
+                    <li style="padding-left: 10px;"><strong>Room Tag:</strong> Displays the currently detected primary activity space.</li>
+                    <li style="padding-left: 10px;"><strong>Device Cards:</strong> Visually represent your connected smart devices.</li>
+                    <li style="padding-left: 10px;"><strong>Trigger Time:</strong> Records the last time a mode was triggered by AI or manually.</li>
+                </ul>
+                <p>You can switch to different pages using the bottom navigation bar.</p>
+            </div>
+            <button onclick="this.closest('.spatial-info-dialog').remove()" style="
+                background: rgba(255, 255, 255, 0.2); color: white; border: none; padding: 12px 24px;
+                border-radius: 25px; font-weight: 600; cursor: pointer; font-size: 14px;
+            ">Close</button>
+        `;
+        document.body.appendChild(infoDialog);
+    }
+
+    showModeInfo() {
+        const currentModeId = this.getCurrentMode().id;
+        const modeData = this.modeInfoData[currentModeId];
+        if (!modeData) {
+            console.error("Cannot find detailed information for current mode:", currentModeId);
+            return;
+        }
+
+        const infoDialog = document.createElement('div');
+        infoDialog.className = 'spatial-info-dialog';
+        infoDialog.style.cssText = `
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(30, 30, 30, 0.95); color: white; padding: 30px; border-radius: 20px;
+            backdrop-filter: blur(20px); z-index: 3000; text-align: left;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); max-width: 420px;
+            border: 1px solid rgba(255, 255, 255, 0.2); font-family: 'NCTTorin Regular', sans-serif;
+        `;
+
+        const renderList = (items, renderItem) => items.map(renderItem).join('');
+
+        infoDialog.innerHTML = `
+            <h3 style="font-size: 20px; font-weight: 600; margin-bottom: 20px; text-align: center;">${modeData.title}</h3>
+            
+            <h4 style="font-size: 16px; font-weight: 500; opacity: 0.8; margin-bottom: 10px;">Core Scent Formula</h4>
+            <ul style="padding: 0; margin: 0 0 20px 0; list-style: none;">
+                ${renderList(modeData.coreScents, item => `
+                    <li style="background: rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 8px 12px; margin-bottom: 5px;">
+                        <strong>${item.name}:</strong> <span style="opacity: 0.8;">${item.effect}</span>
+                    </li>
+                `)}
+            </ul>
+
+            <h4 style="font-size: 16px; font-weight: 500; opacity: 0.8; margin-bottom: 10px;">AI Smart Adjustment</h4>
+            <div style="background: rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 12px; font-size: 14px; line-height: 1.5; opacity: 0.9;">
+                ${modeData.aiSummary}
+            </div>
+
+            <h4 style="font-size: 16px; font-weight: 500; opacity: 0.8; margin: 20px 0 10px 0;">Expected Benefits</h4>
+            <ul style="padding: 0; margin: 0 0 25px 0; list-style: none; display: grid; grid-template-columns: 1fr; gap: 8px;">
+                 ${renderList(modeData.benefits, item => `
+                    <li style="display: flex; justify-content: space-between; background: rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 8px 12px;">
+                        <span style="opacity: 0.8;">${item.label}:</span> <strong>${item.value}</strong>
+                    </li>
+                 `)}
+            </ul>
+
+            <div style="text-align: center;">
+                <button onclick="this.closest('.spatial-info-dialog').remove()" style="
+                    background: rgba(255, 255, 255, 0.2); color: white; border: none; padding: 12px 24px;
+                    border-radius: 25px; font-weight: 600; cursor: pointer; font-size: 14px;
+                ">Close</button>
+            </div>
+        `;
+        document.body.appendChild(infoDialog);
     }
     
     startAutoTrigger() {
@@ -1448,6 +2030,194 @@ class OdoraiApp {
         
         return modeDataMap[mode] || modeDataMap.relax;
     }
+
+    setupWebSocket() {
+        // 自動檢測是本機還是局域網訪問
+        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const wsHost = isLocalhost ? 'localhost' : window.location.hostname;
+        const wsUrl = `ws://${wsHost}:8080`;
+        
+        console.log(`🔗 正在嘗試連接 WebSocket: ${wsUrl}`);
+        console.log(`🌐 當前位置: ${window.location.href}`);
+        console.log(`📱 用戶代理: ${navigator.userAgent}`);
+        
+        // 清理舊的WebSocket連接
+        if (this.ws) {
+            this.ws.close();
+        }
+        
+        this.ws = new WebSocket(wsUrl);
+        this.wsConnected = false;
+
+        this.ws.onopen = () => {
+            console.log('✅ WebSocket 已成功連線到伺服器！');
+            console.log(`🔗 WebSocket 狀態: ${this.ws.readyState}`);
+            this.wsConnected = true;
+            
+            // 僅保留console日誌，移除視覺提示
+            // this.showConnectionStatus('✅ WebSocket 連接成功！', '#00ff00');
+        };
+
+        this.ws.onmessage = (event) => {
+            console.log('📱🔄 從 WebSocket 伺服器收到訊息:', event.data);
+            try {
+                const data = JSON.parse(event.data);
+                console.log('📱📊 解析後的數據:', data);
+
+                // 檢查收到的資料是否包含 deviceId 和 newImage
+                if (data.deviceId && data.newImage) {
+                    console.log(`📱🔍 收到圖片更新請求: Device ${data.deviceId} → ${data.newImage}`);
+                    
+                    // 檢查檔案是否存在
+                    const imgPath = `./assets/images/${data.newImage}`;
+                    const testImg = new Image();
+                    
+                    testImg.onload = () => {
+                        console.log(`📱✅ 圖片檔案存在: ${data.newImage}`);
+                        
+                        // 直接更新圖片
+                        const imgElementId = `raspberry-pi-${data.deviceId}-img`;
+                        const imgElement = document.getElementById(imgElementId);
+                        
+                        if (imgElement) {
+                            const oldSrc = imgElement.src;
+                            imgElement.src = imgPath;
+                            console.log(`📱✅ 已更新圖片元素 #${imgElementId}`);
+                            console.log(`📱🔄 舊圖片: ${oldSrc}`);
+                            console.log(`📱🆕 新圖片: ${imgElement.src}`);
+                        } else {
+                            console.warn(`📱⚠️ 找不到對應的圖片元素: #${imgElementId}`);
+                        }
+                    };
+                    
+                    testImg.onerror = () => {
+                        console.error(`📱❌ 圖片檔案不存在: ${data.newImage}`);
+                        console.log(`📱💡 可用的圖片檔案: prototype1.png 到 prototype8.png`);
+                        
+                        // 顯示錯誤提示
+                        this.showConnectionStatus(`❌ 圖片檔案不存在: ${data.newImage}`, '#ff0000');
+                    };
+                    
+                    testImg.src = imgPath;
+                } else {
+                    console.log('📱❓ 訊息不包含有效的 deviceId 或 newImage:', data);
+                }
+            } catch (error) {
+                console.error('📱💥 處理 WebSocket 訊息時發生錯誤:', error);
+            }
+        };
+
+        this.ws.onclose = () => {
+            console.log('🔌 WebSocket 連線已關閉。將在3秒後嘗試重新連線...');
+            console.log(`📊 關閉時的狀態: ${this.ws.readyState}`);
+            this.wsConnected = false;
+            
+            // 移除重連提示，僅保留console日誌
+            // this.showConnectionStatus('🔄 WebSocket 重新連線中...', '#ff9900');
+            
+            // 簡單的重新連線機制
+            setTimeout(() => {
+                console.log('🔄 正在重新連線 WebSocket...');
+                this.setupWebSocket();
+            }, 3000);
+        };
+
+        this.ws.onerror = (error) => {
+            console.error('❌ WebSocket 發生錯誤:', error);
+            console.log(`📊 錯誤時的狀態: ${this.ws.readyState}`);
+            this.wsConnected = false;
+            
+            // 顯示錯誤提示
+            this.showConnectionStatus('❌ WebSocket 連接失敗！', '#ff0000');
+            
+            // 當發生錯誤時，瀏覽器的 onclose 事件通常也會被觸發，
+            // 所以重連邏輯會在那裡處理。
+        };
+    }
+
+    // 顯示連接狀態的視覺提示
+    showConnectionStatus(message, color) {
+        // 移除舊的狀態提示
+        const oldStatus = document.getElementById('ws-connection-status');
+        if (oldStatus) {
+            oldStatus.remove();
+        }
+
+        // 創建新的狀態提示
+        const statusDiv = document.createElement('div');
+        statusDiv.id = 'ws-connection-status';
+        statusDiv.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            color: ${color};
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 10001;
+            border: 2px solid ${color};
+            max-width: 300px;
+            word-wrap: break-word;
+        `;
+        
+        statusDiv.textContent = message;
+        document.body.appendChild(statusDiv);
+        
+        // 自動移除（除了錯誤訊息）
+        if (!message.includes('失敗') && !message.includes('錯誤')) {
+            setTimeout(() => {
+                if (statusDiv.parentElement) {
+                    statusDiv.remove();
+                }
+            }, 3000);
+        }
+    }
+
+    // 改進的圖片更新函數，包含錯誤處理和視覺回饋
+    updateRaspberryPiImage(deviceId, newImage) {
+        console.log(`🖼️ 嘗試更新 Device ${deviceId} 圖片為: ${newImage}`);
+        
+        const imgElementId = `raspberry-pi-${deviceId}-img`;
+        const imgElement = document.getElementById(imgElementId);
+        
+        if (!imgElement) {
+            console.error(`❌ 找不到圖片元素: #${imgElementId}`);
+            this.showConnectionStatus(`❌ 找不到圖片元素 #${imgElementId}`, '#ff0000');
+            return false;
+        }
+
+        // 檢查檔案是否存在
+        const imgPath = `./assets/images/${newImage}`;
+        const testImg = new Image();
+        
+        testImg.onload = () => {
+            console.log(`✅ 圖片檔案存在: ${newImage}`);
+            const oldSrc = imgElement.src;
+            imgElement.src = imgPath;
+            
+            console.log(`✅ 已更新圖片元素 #${imgElementId}`);
+            console.log(`🔄 舊圖片: ${oldSrc}`);
+            console.log(`🆕 新圖片: ${imgElement.src}`);
+            
+            // 強制觸發圖片重新載入確認
+            imgElement.onload = () => {
+                console.log(`🎉 圖片在頁面上載入成功: ${newImage}`);
+            };
+            imgElement.onerror = () => {
+                console.error(`❌ 圖片在頁面上載入失敗: ${newImage}`);
+                this.showConnectionStatus(`❌ 圖片載入失敗: ${newImage}`, '#ff0000');
+            };
+        };
+        
+        testImg.onerror = () => {
+            console.error(`❌ 圖片檔案不存在: ${newImage}`);
+            this.showConnectionStatus(`❌ 圖片檔案不存在: ${newImage}`, '#ff0000');
+        };
+        
+        testImg.src = imgPath;
+        return true;
+    }
 }
 
 // Initialize the app when DOM is loaded
@@ -1555,6 +2325,568 @@ window.getScentStatus = () => {
     return null;
 };
 
+// 全域測試工具 - 測試模式圖片顯示
+window.testModeDisplay = () => {
+    if (window.odoraiApp) {
+        console.log('🧪 測試方法1 (HTML重建)');
+        window.odoraiApp.updateModeDisplay();
+        return true;
+    }
+    console.error('ÔDÔRAI app 尚未初始化');
+    return false;
+};
+
+window.testBackgroundMethod = () => {
+    if (window.odoraiApp) {
+        console.log('🧪 測試方法2 (CSS背景圖片)');
+        window.odoraiApp.updateModeDisplayWithBackground();
+        return true;
+    }
+    console.error('ÔDÔRAI app 尚未初始化');
+    return false;
+};
+
+// 📝 測試英文模式資訊顯示
+window.testEnglishModeInfo = () => {
+    console.log('📝 測試英文模式資訊顯示...');
+    
+    if (!window.odoraiApp) {
+        console.error('❌ ÔDÔRAI app 未初始化');
+        return false;
+    }
+    
+    // 切換到 MODE PAGE
+    window.odoraiApp.switchPage('mode-page');
+    
+    // 測試所有模式的英文資訊
+    const modes = ['RELAX', 'FOCUS', 'SLEEP', 'FRESH', 'HAPPY'];
+    let testIndex = 0;
+    
+    const testNextMode = () => {
+        if (testIndex >= modes.length) {
+            console.log('✅ 所有英文模式資訊測試完成！');
+            return;
+        }
+        
+        const modeName = modes[testIndex];
+        console.log(`\n📝 測試模式: ${modeName} (${testIndex + 1}/${modes.length})`);
+        
+        // 切換到指定模式
+        window.odoraiApp.currentModeIndex = testIndex;
+        window.odoraiApp.updateModeDisplay();
+        window.odoraiApp.updateModeDotsDisplay();
+        
+        setTimeout(() => {
+            // 檢查 modeInfoData 是否存在英文內容
+            const currentMode = window.odoraiApp.getCurrentMode();
+            const modeData = window.odoraiApp.modeInfoData[currentMode.id];
+            
+            if (modeData) {
+                console.log(`📋 標題: ${modeData.title}`);
+                console.log(`📋 AI描述: ${modeData.aiSummary.substring(0, 50)}...`);
+                console.log(`📋 香味配方: ${modeData.coreScents.map(s => s.name).join(', ')}`);
+                console.log(`📋 效果: ${modeData.benefits.map(b => b.label).join(', ')}`);
+                
+                // 檢查是否為英文
+                const hasEnglish = /[a-zA-Z]/.test(modeData.aiSummary);
+                if (hasEnglish) {
+                    console.log('✅ 模式資訊已為英文！');
+                } else {
+                    console.error('❌ 模式資訊仍為中文');
+                }
+            } else {
+                console.error(`❌ 找不到 ${modeName} 模式的資訊`);
+            }
+            
+            testIndex++;
+            setTimeout(testNextMode, 1000);
+        }, 500);
+    };
+    
+    testNextMode();
+    return true;
+};
+
+// 🕐 測試實時時間更新功能
+window.testTimeUpdate = () => {
+    console.log('🕐 測試實時時間更新功能...');
+    
+    if (!window.odoraiApp) {
+        console.error('❌ ÔDÔRAI app 未初始化');
+        return false;
+    }
+    
+    // 切換到 HOME PAGE 以查看時間
+    window.odoraiApp.switchPage('home-page');
+    
+    setTimeout(() => {
+        const triggerTimeElement = document.querySelector('.trigger-time');
+        if (triggerTimeElement) {
+            const currentTime = triggerTimeElement.textContent;
+            console.log(`✅ 找到時間元素: "${currentTime}"`);
+            
+            // 手動測試時間更新
+            window.odoraiApp.updateTriggerTime();
+            
+            setTimeout(() => {
+                const updatedTime = triggerTimeElement.textContent;
+                console.log(`🔄 更新後時間: "${updatedTime}"`);
+                
+                // 檢查時間格式
+                const timeRegex = /^\d{2}:\d{2} Trigger$/;
+                if (timeRegex.test(updatedTime)) {
+                    console.log('✅ 時間格式正確 (HH:MM Trigger)');
+                    
+                    // 檢查是否為當前時間
+                    const now = new Date();
+                    const expectedHours = String(now.getHours()).padStart(2, '0');
+                    const expectedMinutes = String(now.getMinutes()).padStart(2, '0');
+                    const expectedTime = `${expectedHours}:${expectedMinutes} Trigger`;
+                    
+                    if (updatedTime === expectedTime) {
+                        console.log('✅ 顯示的是當前實際時間！');
+                        console.log('🎉 實時時間功能測試成功！');
+                    } else {
+                        console.log(`⚠️ 時間可能有1分鐘差異，這是正常的`);
+                        console.log(`期望: ${expectedTime}, 實際: ${updatedTime}`);
+                    }
+                } else {
+                    console.error('❌ 時間格式不正確');
+                }
+            }, 100);
+        } else {
+            console.error('❌ 找不到時間元素 (.trigger-time)');
+        }
+    }, 500);
+    
+    return true;
+};
+
+// 🔄 測試 HOME PAGE 和 MODE PAGE 同步功能
+window.testHomeModSync = () => {
+    console.log('🔄 測試 HOME PAGE 和 MODE PAGE 同步功能...');
+    
+    if (!window.odoraiApp) {
+        console.error('❌ ÔDÔRAI app 未初始化');
+        return false;
+    }
+    
+    // 自動循環測試所有模式
+    const modes = ['RELAX', 'FOCUS', 'SLEEP', 'FRESH', 'HAPPY'];
+    let currentTestIndex = 0;
+    
+    const testNextMode = () => {
+        if (currentTestIndex >= modes.length) {
+            console.log('✅ 所有模式同步測試完成！');
+            return;
+        }
+        
+        const modeName = modes[currentTestIndex];
+        console.log(`\n🔄 測試模式: ${modeName} (${currentTestIndex + 1}/${modes.length})`);
+        
+        // 切換模式
+        window.odoraiApp.currentModeIndex = currentTestIndex;
+        window.odoraiApp.updateModeDisplay();
+        window.odoraiApp.updateModeDotsDisplay();
+        
+        setTimeout(() => {
+            // 檢查 MODE PAGE 的圖片
+            const modePageImg = document.querySelector('#mode-page .relax-title-img');
+            const modePageSrc = modePageImg ? modePageImg.src : 'NOT FOUND';
+            
+            // 檢查 HOME PAGE 的圖片
+            const homePageImg = document.querySelector('#home-page .main-title-img');
+            const homePageSrc = homePageImg ? homePageImg.src : 'NOT FOUND';
+            
+            // 檢查香味描述
+            const scentDesc = document.querySelector('.scent-description');
+            const scentText = scentDesc ? scentDesc.textContent : 'NOT FOUND';
+            
+            console.log(`📱 MODE PAGE 圖片: ${modePageSrc.split('/').pop()}`);
+            console.log(`🏠 HOME PAGE 圖片: ${homePageSrc.split('/').pop()}`);
+            console.log(`🌸 香味配方: ${scentText}`);
+            
+            // 檢查是否同步
+            const isSync = modePageSrc.includes(modeName) && homePageSrc.includes(modeName);
+            if (isSync) {
+                console.log(`✅ ${modeName} 模式同步成功！`);
+            } else {
+                console.error(`❌ ${modeName} 模式同步失敗！`);
+            }
+            
+            currentTestIndex++;
+            setTimeout(testNextMode, 1000);
+        }, 500);
+    };
+    
+    // 開始測試
+    testNextMode();
+    return true;
+};
+
+// 快速測試香味描述顯示修復
+window.testScentFix = () => {
+    console.log('🧪 測試香味描述修復...');
+    
+    if (!window.odoraiApp) {
+        console.error('❌ ÔDÔRAI app 未初始化');
+        return false;
+    }
+    
+    // 切換到 MODE PAGE
+    window.odoraiApp.switchPage('mode-page');
+    
+    setTimeout(() => {
+        const scentDesc = document.querySelector('.scent-description');
+        if (scentDesc) {
+            console.log('✅ 找到香味描述元素');
+            console.log('📝 當前內容:', `"${scentDesc.textContent}"`);
+            
+            // 檢查樣式
+            const styles = window.getComputedStyle(scentDesc);
+            console.log('🎨 樣式檢查:');
+            console.log('   顏色:', styles.color);
+            console.log('   z-index:', styles.zIndex);
+            console.log('   背景:', styles.background);
+            console.log('   邊框:', styles.border);
+            console.log('   字體大小:', styles.fontSize);
+            console.log('   位置 top:', styles.top);
+            
+            // 強制更新內容測試
+            const originalText = scentDesc.textContent;
+            scentDesc.textContent = '🌸 修復測試 - Lavender + Chamomile + Juniper';
+            console.log('🔧 已更新測試文字');
+            
+            // 恢復原始內容
+            setTimeout(() => {
+                scentDesc.textContent = originalText;
+                console.log('🔄 已恢復原始內容');
+            }, 2000);
+            
+        } else {
+            console.error('❌ 找不到香味描述元素');
+        }
+    }, 500);
+    
+    return true;
+};
+
+// 調試香味描述元素
+window.debugScentDescription = () => {
+    console.log('🔍 調試香味描述元素...');
+    
+    // 切換到 MODE PAGE
+    if (window.odoraiApp) {
+        window.odoraiApp.switchPage('mode-page');
+        
+        setTimeout(() => {
+            const scentDesc = document.querySelector('.scent-description');
+            console.log('📝 香味描述元素:', scentDesc);
+            
+            if (scentDesc) {
+                const styles = window.getComputedStyle(scentDesc);
+                console.log('📍 元素位置和樣式:');
+                console.log('   - 顯示狀態:', styles.display);
+                console.log('   - 可見性:', styles.visibility);
+                console.log('   - 透明度:', styles.opacity);
+                console.log('   - z-index:', styles.zIndex);
+                console.log('   - 位置:', styles.position);
+                console.log('   - top:', styles.top);
+                console.log('   - left:', styles.left);
+                console.log('   - 寬度:', scentDesc.offsetWidth + 'px');
+                console.log('   - 高度:', scentDesc.offsetHeight + 'px');
+                console.log('   - 內容:', `"${scentDesc.textContent}"`);
+                console.log('   - 字體:', styles.fontFamily);
+                console.log('   - 字體大小:', styles.fontSize);
+                console.log('   - 顏色:', styles.color);
+                console.log('   - 背景:', styles.background);
+                
+                // 強制設置樣式確保可見
+                scentDesc.style.display = 'block';
+                scentDesc.style.visibility = 'visible';
+                scentDesc.style.opacity = '1';
+                scentDesc.style.zIndex = '100';
+                scentDesc.style.backgroundColor = 'rgba(255, 255, 0, 0.3)'; // 黃色背景方便看見
+                scentDesc.style.border = '2px solid red'; // 紅色邊框方便看見
+                scentDesc.style.padding = '10px';
+                
+                console.log('🔧 已強制設置可見樣式 (黃色背景 + 紅色邊框)');
+                
+                // 測試更新文字
+                setTimeout(() => {
+                    scentDesc.textContent = '🧪 測試香味配方文字 - Test Scent Description';
+                    console.log('📝 已更新測試文字');
+                }, 1000);
+                
+            } else {
+                console.error('❌ 找不到 .scent-description 元素');
+                
+                // 檢查 MODE PAGE 是否存在
+                const modePage = document.getElementById('mode-page');
+                if (modePage) {
+                    console.log('📄 MODE PAGE 存在，檢查其HTML結構...');
+                    console.log(modePage.innerHTML.substring(0, 500) + '...');
+                } else {
+                    console.error('❌ MODE PAGE 不存在');
+                }
+            }
+        }, 500);
+        
+        return true;
+    } else {
+        console.error('❌ ÔDÔRAI app 未初始化');
+        return false;
+    }
+};
+
+// 測試香味配方顯示
+window.testScentDisplay = () => {
+    console.log('🌸 測試所有模式的香味配方顯示...');
+    
+    if (!window.odoraiApp) {
+        console.error('❌ ÔDÔRAI app 未初始化');
+        return false;
+    }
+    
+    // 切換到 MODE PAGE
+    window.odoraiApp.switchPage('mode-page');
+    
+    const modes = [
+        { name: 'RELAX', blend: 'Oud Wood + Orange + Frankincense' },
+        { name: 'FOCUS', blend: 'Jasmine + Eucalyptus + Peppermint' },
+        { name: 'SLEEP', blend: 'Lavender + Chamomile + Juniper' },
+        { name: 'FRESH', blend: 'Lemon + Green Tea + Cypress' },
+        { name: 'HAPPY', blend: 'Orange Blossom + Freesia + Peach' }
+    ];
+    
+    let testIndex = 0;
+    
+    const testNextMode = () => {
+        if (testIndex >= modes.length) {
+            console.log('✅ 所有香味配方測試完成！');
+            return;
+        }
+        
+        // 切換到指定模式
+        window.odoraiApp.currentModeIndex = testIndex;
+        window.odoraiApp.updateModeDisplay();
+        window.odoraiApp.updateModeDotsDisplay();
+        
+        setTimeout(() => {
+            const scentDesc = document.querySelector('.scent-description');
+            if (scentDesc) {
+                const displayedText = scentDesc.textContent;
+                const expectedText = modes[testIndex].blend;
+                
+                if (displayedText === expectedText) {
+                    console.log(`✅ ${modes[testIndex].name}: ${displayedText}`);
+                } else {
+                    console.error(`❌ ${modes[testIndex].name}: 期望 "${expectedText}", 實際 "${displayedText}"`);
+                }
+            } else {
+                console.error(`❌ ${modes[testIndex].name}: 找不到香味描述元素`);
+            }
+            
+            testIndex++;
+            setTimeout(testNextMode, 800);
+        }, 500);
+    };
+    
+    testNextMode();
+    return true;
+};
+
+// 測試所有模式的 info 功能
+window.testAllModeInfo = () => {
+    console.log('🧪 測試所有 5 個模式的 info 功能...');
+    
+    if (!window.odoraiApp) {
+        console.error('❌ ÔDÔRAI app 未初始化');
+        return false;
+    }
+    
+    // 切換到 MODE PAGE
+    window.odoraiApp.switchPage('mode-page');
+    
+    const modeNames = ['RELAX', 'FOCUS', 'SLEEP', 'FRESH', 'HAPPY'];
+    let testIndex = 0;
+    
+    const testNextMode = () => {
+        if (testIndex >= 5) {
+            console.log('✅ 所有模式測試完成！');
+            return;
+        }
+        
+        // 切換到指定模式
+        window.odoraiApp.currentModeIndex = testIndex;
+        window.odoraiApp.updateModeDisplay();
+        window.odoraiApp.updateModeDotsDisplay();
+        
+        console.log(`🔄 測試模式 ${testIndex + 1}/5: ${modeNames[testIndex]}`);
+        
+        setTimeout(() => {
+            // 檢查 modeInfoData 是否存在
+            const currentMode = window.odoraiApp.getCurrentMode();
+            const modeData = window.odoraiApp.modeInfoData[currentMode.id];
+            
+            if (modeData) {
+                console.log(`✅ ${modeNames[testIndex]} - 數據存在:`, modeData.title);
+                
+                // 測試點擊 info 按鈕
+                try {
+                    window.odoraiApp.showModeInfo();
+                    console.log(`✅ ${modeNames[testIndex]} - info 彈窗正常`);
+                    
+                    // 關閉彈窗
+                    setTimeout(() => {
+                        const dialog = document.querySelector('.spatial-info-dialog');
+                        if (dialog) {
+                            dialog.remove();
+                        }
+                        testIndex++;
+                        testNextMode();
+                    }, 500);
+                    
+                } catch (error) {
+                    console.error(`❌ ${modeNames[testIndex]} - info 功能錯誤:`, error);
+                    testIndex++;
+                    testNextMode();
+                }
+            } else {
+                console.error(`❌ ${modeNames[testIndex]} - 缺少數據，模式ID: ${currentMode.id}`);
+                testIndex++;
+                testNextMode();
+            }
+        }, 500);
+    };
+    
+    testNextMode();
+    return true;
+};
+
+// 測試 MODE PAGE 完整功能
+window.testModePageFunctions = () => {
+    console.log('🧪 測試 MODE PAGE 完整功能...');
+    
+    // 測試切換到 MODE PAGE
+    if (window.odoraiApp) {
+        window.odoraiApp.switchPage('mode-page');
+        console.log('✅ 已切換到 MODE PAGE');
+        
+        // 測試香味描述顯示
+        setTimeout(() => {
+            const scentDesc = document.querySelector('.scent-description');
+            if (scentDesc) {
+                console.log('🌸 當前香味描述:', scentDesc.textContent);
+                
+                // 測試模式切換時香味描述更新
+                const originalMode = window.odoraiApp.currentModeIndex;
+                console.log('🔄 測試切換模式...');
+                
+                // 切換到 FOCUS 模式 (index 1)
+                window.odoraiApp.currentModeIndex = 1;
+                window.odoraiApp.updateModeDisplay();
+                
+                setTimeout(() => {
+                    console.log('🌿 FOCUS 模式香味:', document.querySelector('.scent-description').textContent);
+                    
+                    // 切換到 SLEEP 模式 (index 2)
+                    window.odoraiApp.currentModeIndex = 2;
+                    window.odoraiApp.updateModeDisplay();
+                    
+                    setTimeout(() => {
+                        console.log('😴 SLEEP 模式香味:', document.querySelector('.scent-description').textContent);
+                        
+                        // 恢復原始模式
+                        window.odoraiApp.currentModeIndex = originalMode;
+                        window.odoraiApp.updateModeDisplay();
+                        console.log('🔙 已恢復原始模式');
+                    }, 500);
+                }, 500);
+            } else {
+                console.error('❌ 找不到香味描述元素');
+            }
+        }, 500);
+        
+        // 測試 info button
+        setTimeout(() => {
+            const infoIcon = document.querySelector('#mode-page .info-icon');
+            if (infoIcon) {
+                console.log('ℹ️ 找到 info button，測試點擊功能...');
+                infoIcon.click();
+                console.log('✅ info button 點擊測試完成');
+            } else {
+                console.error('❌ 找不到 MODE PAGE 的 info button');
+            }
+        }, 1000);
+        
+        return true;
+    } else {
+        console.error('❌ ÔDÔRAI app 未初始化');
+        return false;
+    }
+};
+
+// 調試工具 - 檢查圖片元素狀態
+window.debugModeImages = () => {
+    console.log('🔍 檢查 MODE PAGE 圖片狀態...');
+    
+    // 檢查容器
+    const container = document.querySelector('.mode-image-container');
+    console.log('📦 模式圖片容器:', container);
+    if (container) {
+        console.log('   - 位置:', window.getComputedStyle(container).position);
+        console.log('   - 尺寸:', container.offsetWidth + 'x' + container.offsetHeight);
+        console.log('   - 可見性:', window.getComputedStyle(container).visibility);
+    }
+    
+    // 檢查圓形容器
+    const pinkCircle = document.querySelector('.pink-circle');
+    console.log('🟣 粉紅色圓形容器:', pinkCircle);
+    if (pinkCircle) {
+        console.log('   - 位置:', window.getComputedStyle(pinkCircle).position);
+        console.log('   - 尺寸:', pinkCircle.offsetWidth + 'x' + pinkCircle.offsetHeight);
+        console.log('   - z-index:', window.getComputedStyle(pinkCircle).zIndex);
+    }
+    
+    // 檢查圓形圖片
+    const circleImg = document.querySelector('.circle-image');
+    console.log('🖼️ 圓形圖片:', circleImg);
+    if (circleImg) {
+        console.log('   - src:', circleImg.src);
+        console.log('   - 尺寸:', circleImg.offsetWidth + 'x' + circleImg.offsetHeight);
+        console.log('   - 載入狀態:', circleImg.complete ? '✅ 已載入' : '⏳ 載入中');
+        console.log('   - 可見性:', window.getComputedStyle(circleImg).visibility);
+        console.log('   - 透明度:', window.getComputedStyle(circleImg).opacity);
+        console.log('   - z-index:', window.getComputedStyle(circleImg).zIndex);
+    }
+    
+    // 檢查標題圖片
+    const titleImg = document.querySelector('.relax-title-img');
+    console.log('📝 標題圖片:', titleImg);
+    if (titleImg) {
+        console.log('   - src:', titleImg.src);
+        console.log('   - 尺寸:', titleImg.offsetWidth + 'x' + titleImg.offsetHeight);
+        console.log('   - 載入狀態:', titleImg.complete ? '✅ 已載入' : '⏳ 載入中');
+    }
+    
+    // 檢查當前頁面
+    const modePage = document.getElementById('mode-page');
+    console.log('📄 MODE PAGE:', modePage);
+    if (modePage) {
+        console.log('   - 是否激活:', modePage.classList.contains('active'));
+        console.log('   - 顯示狀態:', window.getComputedStyle(modePage).display);
+    }
+    
+    return {
+        container: !!container,
+        pinkCircle: !!pinkCircle,
+        circleImg: !!circleImg,
+        titleImg: !!titleImg,
+        pageActive: modePage?.classList.contains('active')
+    };
+};
+
 // Global developer tools
 window.editDevicePositions = () => {
     if (window.odoraiApp) {
@@ -1619,7 +2951,73 @@ window.adjustPosition = (device, deltaX, deltaY) => {
     }
 };
 
+// 🧪 iPad Safari 測試函數 - 模擬 Raspberry Pi 訊息
+window.testWebSocketUpdate = (deviceId = "1", newImage = "prototype2.png") => {
+    console.log(`🧪 模擬 WebSocket 訊息: deviceId=${deviceId}, newImage=${newImage}`);
+    
+    const imgElementId = `raspberry-pi-${deviceId}-img`;
+    const imgElement = document.getElementById(imgElementId);
+    
+    if (imgElement) {
+        const oldSrc = imgElement.src;
+        imgElement.src = `./assets/images/${newImage}`;
+        console.log(`✅ 測試更新成功! Element: #${imgElementId}`);
+        console.log(`🔄 舊圖片: ${oldSrc}`);
+        console.log(`🆕 新圖片: ${imgElement.src}`);
+        return true;
+    } else {
+        console.error(`❌ 找不到圖片元素: #${imgElementId}`);
+        return false;
+    }
+};
+
+// 🧪 快速測試不同圖片
+window.testProto1 = () => testWebSocketUpdate("1", "prototype1.png");
+window.testProto2 = () => testWebSocketUpdate("1", "prototype2.png");
+window.testProto3 = () => testWebSocketUpdate("1", "prototype3.png");
+window.testProto4 = () => testWebSocketUpdate("1", "prototype4.png");
+
+// 🔍 WebSocket狀態檢查
+window.checkWebSocketStatus = () => {
+    if (!window.odoraiApp) {
+        console.error('❌ ÔDÔRAI app 未初始化');
+        alert('❌ ÔDÔRAI app 未初始化');
+        return;
+    }
+    
+    const ws = window.odoraiApp.ws;
+    if (!ws) {
+        console.error('❌ WebSocket 未初始化');
+        window.odoraiApp.showConnectionStatus('❌ WebSocket 未初始化', '#ff0000');
+        return;
+    }
+    
+    const states = {
+        0: 'CONNECTING (連接中)',
+        1: 'OPEN (已連接)',
+        2: 'CLOSING (關閉中)',
+        3: 'CLOSED (已關閉)'
+    };
+    
+    console.log('🔍 WebSocket 狀態檢查:');
+    console.log(`📊 狀態: ${states[ws.readyState]} (${ws.readyState})`);
+    console.log(`🌐 URL: ${ws.url}`);
+    console.log(`📡 協議: ${ws.protocol}`);
+    console.log(`🔗 擴展: ${ws.extensions}`);
+    console.log(`🔌 連接狀態: ${window.odoraiApp.wsConnected}`);
+    
+    const statusColor = ws.readyState === 1 ? '#00ff00' : '#ff0000';
+    const message = `WebSocket 狀態: ${states[ws.readyState]}\nURL: ${ws.url}`;
+    
+    window.odoraiApp.showConnectionStatus(message, statusColor);
+};
+
 // Export for testing or external use
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { OdoraiApp, OdoraiUtils };
 }
+
+
+
+
+

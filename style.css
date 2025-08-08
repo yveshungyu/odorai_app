@@ -28,7 +28,111 @@ body {
     align-items: center;
     min-height: 100vh;
     color: white;
+    /* 禁用滾動 */
+    overflow: hidden !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    position: fixed !important;
+    width: 100% !important;
 }
+
+/* ===== 禁用所有頁面滾動 ===== */
+html {
+    overflow: hidden !important;
+    overflow-x: hidden !important;
+    overflow-y: hidden !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+}
+
+/* 確保主要頁面容器不能滾動 */
+#home-page,
+#mode-page, 
+#spatial-page {
+    overflow: hidden !important;
+    overflow-x: hidden !important;
+    overflow-y: hidden !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+}
+
+/* 防止觸摸設備上的滾動行為 */
+html, body {
+    touch-action: none !important;
+    -webkit-overflow-scrolling: none !important;
+    overscroll-behavior: none !important;
+    overscroll-behavior-x: none !important;
+    overscroll-behavior-y: none !important;
+}
+
+/* Safari 專用設定 */
+body {
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+}
+
+/* 禁用所有滾動的額外設定 */
+* {
+    -webkit-overflow-scrolling: none !important;
+    overflow-x: hidden !important;
+    overflow-y: hidden !important;
+    overflow: hidden !important;
+}
+
+/* Safari 專用垂直滾動禁用 */
+body, html {
+    -webkit-overflow-scrolling: none !important;
+    -webkit-user-drag: none !important;
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    user-select: none !important;
+}
+
+/* 防止 Safari 上的橡皮筋效果和滾動 */
+document, body {
+    overscroll-behavior: none !important;
+    overscroll-behavior-y: none !important;
+    overscroll-behavior-x: none !important;
+}
+
+/* 保留資訊對話框的滾動功能 */
+.info-dialog {
+    overflow-y: auto !important;
+    position: fixed !important;
+    touch-action: auto !important;
+}
+
+/* 強制禁用所有可能的滾動元素 */
+.fixed-ratio-container,
+.page,
+.content,
+.app-container {
+    overflow: hidden !important;
+    overflow-x: hidden !important;
+    overflow-y: hidden !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+}
+
+/* ===== 禁用頁面切換動畫 ===== */
+/* 只針對頁面容器禁用切換動畫，保留其他元素的動畫 */
+.page, .content, #home-page, #mode-page, #spatial-page {
+    transition: none !important;
+    animation: none !important;
+    -webkit-transition: none !important;
+    -webkit-animation: none !important;
+    -moz-transition: none !important;
+    -moz-animation: none !important;
+    -o-transition: none !important;
+    -o-animation: none !important;
+}
+
+/* 頁面容器保持基本設定，允許子元素使用 transform 定位 */
 
 /* ===== 固定比例容器 ===== */
 .fixed-ratio-container {
@@ -101,55 +205,79 @@ body {
     height: 141px;
     background: #000;
     display: flex;
-    justify-content: space-around;
-    align-items: center;
     border-top: 1px solid #333;
 }
 
 .nav-item {
+    flex: 1;
+    height: 100%;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 100px;
-    height: 80px;
     cursor: pointer;
-    border-radius: 12px;
-    transition: all 0.3s ease;
     background: transparent;
+    position: relative; /* 為了指示器定位 */
+    overflow: hidden; /* 確保指示器動畫在按鈕範圍內 */
 }
 
-.nav-item:hover {
-    background: rgba(255, 255, 255, 0.1);
+/* 指示器 (白色線條) */
+.nav-item::before {
+    content: '';
+    position: absolute;
+    top: 10px; /* 稍微往下移動一點 */
+    width: 50px;
+    height: 4px;
+    background-color: white;
+    border-radius: 2px;
+    transform: scaleX(0); /* 默認水平縮放為0 (隱藏) */
+    transform-origin: center;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* 帶有彈性的過渡 */
 }
 
-.nav-item.active {
-    background: rgba(255, 255, 255, 0.2);
+/* 滑鼠懸停時，顯示指示器 */
+.nav-item:hover::before {
+    transform: scaleX(1);
 }
 
-.nav-label {
-    font-family: 'NCTTorin Regular', sans-serif; /* 使用NCTTorin字體 */
-    font-size: 16px;
-    color: #aaa;
-    font-weight: 500;
+/* 當前活動項目的指示器保持可見 */
+.nav-item.active::before {
+    transform: scaleX(1);
 }
 
-.nav-item.active .nav-label {
-    color: white;
+.nav-icon {
+    font-size: 32px;
+    transition: all 0.3s ease;
+    opacity: 0.5; /* 未選中時半透明 */
+    color: white; /* 圖標始終為白色 */
+    transform: scale(1);
+}
+
+/* 滑鼠懸停時，圖標變亮 */
+.nav-item:hover .nav-icon {
+    opacity: 1;
+}
+
+/* 當前活動項目的圖標為完全不透明且稍微放大 */
+.nav-item.active .nav-icon {
+    opacity: 1;
+    transform: scale(1.1);
 }
 
 /* ===== 頁面特殊背景 ===== */
 #home-page {
-    background: #939598;
+   background: #333333;
     position: relative;
     padding: 0;
 }
 
 #mode-page {
-    background: #939598; /* 與主頁一樣的灰色 */
+    background: #333333; /* 與主頁一樣的灰色 */
     position: relative;
     padding: 0;
 }
+
+
+
 
 /* ===== 模式頁i圖標 ===== */
 #mode-page .info-icon {
@@ -182,6 +310,7 @@ body {
     transform: translateX(-50%);
     width: 445px;
     height: 445px;
+    z-index: 50; /* 確保圓形圖片在正確層級顯示 */
 }
 
 .circle-image {
@@ -190,6 +319,9 @@ body {
     border-radius: 50%; /* 圓角成圓形 */
     object-fit: cover;
     display: block;
+    opacity: 1 !important; /* 強制確保圖片可見 */
+    visibility: visible !important; /* 強制確保圖片可見 */
+    z-index: 51; /* 確保圖片在圓形容器之上 */
 }
 
 /* ===== RELAX標題 ===== */
@@ -199,6 +331,7 @@ body {
     left: 50%;
     transform: translateX(-50%);
     text-align: center;
+    z-index: 50; /* 確保標題圖片在正確層級顯示 */
 }
 
 .relax-title-img {
@@ -210,15 +343,20 @@ body {
 /* ===== 香味描述 ===== */
 .scent-description {
     position: absolute;
-    top: 660px; /* 728 - 68 = 660px */
+    top: 650px; /* 確保在標題下方 */
     left: 50%;
     transform: translateX(-50%);
-    font-family: 'NCTTorin Regular', sans-serif;
-    font-size: 18px; /* 調整以達到高度22px */
-    line-height: 22px; /* 字體高度22px */
-    color: #333;
+    font-family: 'NCTTorin Regular', 'Arial', sans-serif; /* 添加備用字體 */
+    font-size: 24px; /* 增大字體 */
+    line-height: 30px;
+    color: #ffffff; /* 純白色文字 */
     text-align: center;
-    font-weight: 400;
+    font-weight: 600; /* 加粗字體 */
+    width: 100%;
+    max-width: 900px;
+    letter-spacing: 1px;
+    z-index: 60; /* 提高層級，確保不被遮擋 */
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8); /* 保持文字陰影增強可讀性 */
 }
 
 /* ===== 統計卡片容器 ===== */
@@ -260,10 +398,16 @@ body {
     font-family: 'NCTTorin Regular', sans-serif;
 }
 
+.change-indicator {
+    font-size: 28px !important; /* 加大字體 */
+    font-weight: 600 !important;
+    color: #28a745 !important; /* 股票綠色，強制優先 */
+}
+
 .change-positive {
-    font-size: 24px;
-    font-weight: 600;
-    color: #E74C3C; /* 紅色變化 */
+    font-size: 28px !important; /* 加大字體 */
+    font-weight: 600 !important;
+    color: #28a745 !important; /* 股票綠色，強制優先 */
 }
 
 .stat-time {
@@ -279,22 +423,64 @@ body {
     color: #333;
 }
 
+/* ===== 模式圖片容器樣式 ===== */
+.mode-image-container {
+    position: relative;
+    width: 100%;
+    height: 650px; /* 足夠容納圓形圖片(445px)和標題(54px)的高度 */
+    cursor: pointer;
+    touch-action: pan-x; /* 允許水平滑動 */
+    user-select: none;
+}
+
+/* ===== 模式導航點樣式 ===== */
+.mode-dots {
+    position: absolute;
+    bottom: 160px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    z-index: 100;
+}
+
+.mode-dots .nav-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.mode-dots .nav-dot.active {
+    background-color: #f7941d;
+    transform: scale(1.2);
+}
+
+.mode-dots .nav-dot:hover {
+    background-color: rgba(255, 255, 255, 0.6);
+    transform: scale(1.1);
+}
+
+
 #spatial-page {
-    background: #939598; /* 改為與主頁一樣的灰色 */
+    background: #333333; /* 改為與主頁一樣的灰色 */
     position: relative;
     padding: 0;
 }
 
 /* ===== 空間頁頂部文字區 ===== */
 .spatial-header {
-    position: relative;
-    padding: 77px 0 0 0; /* 與其他頁面對齊 */
-    width: 100%;
+    position: absolute;
+    top: 77px; /* Hello文字距離頂部77px */
+    left: 60px;
+    right: 51px;
+    width: auto;
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    padding-left: 60px;
-    padding-right: 51px; /* 配合i圖標位置 */
 }
 
 .greeting-text {
@@ -321,9 +507,7 @@ body {
 }
 
 .spatial-header .info-icon {
-    position: absolute;
-    top: 77px; /* 與其他頁面對齊 */
-    right: 51px; /* 與主頁一致 */
+    position: static; /* 改為靜態定位，依賴 flexbox */
     width: 80px;
     height: 80px;
     background: rgba(255, 255, 255, 0.2);
@@ -342,6 +526,7 @@ body {
     transition: all 0.3s ease;
     user-select: none;
     pointer-events: auto;
+    flex-shrink: 0; /* 防止收縮 */
 }
 
 .spatial-header .info-icon:hover {
@@ -350,25 +535,24 @@ body {
     border-color: rgba(255, 255, 255, 0.5);
 }
 
-/* ===== 3D房間圖片容器 ===== */
+/* ===== 修復房間圖片和標籤位置 ===== */
 .room-container {
     position: absolute;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    bottom: 116px; /* 185 - 69 = 116px (調整container高度差異) */
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 290px; /* 往下移動，調整距離底部的距離 */
 }
 
 .room-image {
-    width: 1166px; /* 指定寬度 */
-    height: auto; /* 保持比例 */
+    height: 1080px; /* 固定高度 */
+    width: auto; /* 按照原始比例自動計算寬度 */
     display: block;
+    object-fit: contain; /* 保持原始比例，不裁切 */
 }
 
-/* ===== 導航圓點 ===== */
 .room-dots {
     position: absolute;
-    bottom: 61px; /* 130 - 69 = 61px */
+    bottom: 255px; /* 與橘色標籤頂部對齊 (180px + 75px高度) */
     left: 50%;
     transform: translateX(-50%);
     display: flex;
@@ -393,20 +577,20 @@ body {
     background: rgba(255, 255, 255, 0.6);
 }
 
-/* ===== Living Room 標籤 ===== */
+/* ===== 修復橘色標籤位置 ===== */
 .room-label {
     position: absolute;
-    bottom: 40px; /* 保持距離底部導航40px */
-    left: calc(50% - 583px); /* 左對齊照片左側：中心點減去照片寬度的一半 (1166/2 = 583) */
-    width: 300px; /* 縮短寬度從350px到300px */
+    bottom: 180px; /* 調整距離底部的距離 */
+    left: calc(50% - 583px); /* 左對齊照片左側 */
+    width: 300px;
     height: 75px;
     background: #f7941d;
     border-radius: 37.5px;
     display: flex;
     align-items: center;
-    justify-content: flex-start; /* 左對齊內容 */
+    justify-content: flex-start;
     gap: 16px;
-    padding: 0 24px; /* 左右內邊距 */
+    padding: 0 24px;
     box-shadow: 0 4px 16px rgba(247, 148, 29, 0.3);
     cursor: pointer;
     transition: all 0.3s ease;
@@ -418,22 +602,20 @@ body {
 }
 
 /* 加號的半透明白色圈圈 */
-.add-icon {
-    width: 53px;
-    height: 53px;
-    background: rgba(255, 255, 255, 0.3); /* 半透明白色圈圈 */
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'NCTTorin Regular', sans-serif;
-    font-size: 24px; /* 稍微縮小字體確保居中 */
-    font-weight: bold;
-    color: white; /* 白色加號 */
-    flex-shrink: 0; /* 防止被壓縮 */
-    text-align: center; /* 確保文字居中 */
-    line-height: 1; /* 確保行高為1避免偏移 */
-}
+   .add-icon {
+       width: 53px;
+       height: 53px;
+       background: rgba(255, 255, 255, 0.3); /* 半透明白色圈圈 */
+       border-radius: 50%;
+       display: flex;
+       align-items: center;
+       justify-content: center;
+       font-family: 'NCTTorin Regular', sans-serif;
+       font-size: 30px; /* 調整字體大小以獲得最佳視覺居中 */
+       font-weight: bold;
+       color: white; /* 白色加號 */
+       flex-shrink: 0; /* 防止被壓縮 */
+   }
 
 .room-name {
     font-family: 'NCTTorin Regular', sans-serif;
@@ -447,31 +629,48 @@ body {
 
 /* ===== 主頁頂部標題區 ===== */
 .header-section {
-    position: relative;
-    text-align: center;
-    padding: 77px 0 40px 0; /* 145 - 68 = 77px */
+    position: relative; /* 建立定位上下文 */
+    padding-top: 77px; /* 保持頂部空間 */
+    padding-bottom: 40px;
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .main-title-img {
-    width: 307px; /* 用戶指定的寬度 */
-    height: auto; /* 保持比例 */
+    width: auto;
+    height: 120px;
     display: block;
-    margin: 0 auto;
+    margin-top: 30px; /* 在 CURRENT MODE 和圖片之間添加一些間距 */
+    margin-bottom: 8px; /* 在圖片和 Trigger 之間添加一些間距 */
+}
+
+.current-mode-label {
+    position: absolute;
+    top: 45px; /* 將位置調得更高 */
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'NCTTorin Regular', sans-serif;
+    font-size: 16pt;
+    color: white;
+    font-weight: 400;
+    text-transform: uppercase;
+    opacity: 0.8;
+    letter-spacing: 1px;
 }
 
 .trigger-time {
-    font-family: 'NCTTorin Regular', sans-serif; /* 使用NCTTorin字體 */
-    font-size: 16pt; /* 縮小字體從21pt到16pt */
+    font-family: 'NCTTorin Regular', sans-serif;
+    font-size: 16pt;
     color: white;
-    margin-top: 8px;
     font-weight: 400;
 }
 
 .info-icon {
     position: absolute;
-    top: 77px; /* 145 - 68 = 77px */
-    right: 51px; /* 與右邊卡片對齊 */
+    top: 77px;
+    right: 51px;
     width: 80px;
     height: 80px;
     background: rgba(255, 255, 255, 0.2);
@@ -479,7 +678,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: 'NCTTorin Regular', sans-serif; /* 使用NCTTorin字體 */
+    font-family: 'NCTTorin Regular', sans-serif;
     font-size: 32px;
     font-weight: 600;
     color: white;
@@ -491,6 +690,7 @@ body {
     user-select: none;
     pointer-events: auto;
 }
+
 
 .info-icon:hover {
     background: rgba(255, 255, 255, 0.3);
